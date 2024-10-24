@@ -16,3 +16,5 @@ jobs:
       - name: build
         run: |
           ./.github/release/build.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
