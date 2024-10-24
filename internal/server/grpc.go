@@ -28,9 +28,6 @@ type GRPCServer struct {
 	addr   string
 }
 
-type KeeperServer struct {
-	contract.KeeperServer
-}
 type Opt func(GRPCServer)
 
 func WithTLS(certificate *tls.Certificate) func(*GRPCServer) {
@@ -92,9 +89,4 @@ func ensureValidToken(ctx context.Context, req any, info *grpc.UnaryServerInfo, 
 	}
 	// Continue execution of handler after ensuring a valid token.
 	return handler(ctx, req)
-}
-
-func (s *KeeperServer) Ping(_ context.Context, in *contract.Empty) (*contract.Empty, error) {
-	log.Info("ping")
-	return in, nil
 }
