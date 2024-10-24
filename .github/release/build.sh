@@ -19,7 +19,7 @@ tar -czf ./build/client-windows-amd64.${APP_VERSION}.tar.gz ./build/client-windo
 
 # TODO Нужно опубликовать релиз с этой версией и бинарями. См. https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset"
 createRelease() {
-  curl -L \
+  curl -L -sf \
     -X POST \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
