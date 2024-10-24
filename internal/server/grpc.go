@@ -7,13 +7,13 @@ import (
 	"net"
 	"strings"
 
+	"github.com/sashaaro/gophkeeper/internal/contract"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/sashaaro/gophkeeper/internal/contract"
 	"github.com/sashaaro/gophkeeper/internal/log"
 )
 
@@ -28,6 +28,9 @@ type GRPCServer struct {
 	addr   string
 }
 
+type KeeperServer struct {
+	contract.KeeperServer
+}
 type Opt func(GRPCServer)
 
 func WithTLS(certificate *tls.Certificate) func(*GRPCServer) {
@@ -36,7 +39,7 @@ func WithTLS(certificate *tls.Certificate) func(*GRPCServer) {
 	}
 }
 
-func NewGRPCServer(addr string, opts ...Opt) (*GRPCServer, error) {
+func NewGRPCServer(addr string, opts ...Opt) *GRPCServer {
 	srv := GRPCServer{
 		opts: []grpc.ServerOption{
 			grpc.UnaryInterceptor(ensureValidToken),
@@ -46,14 +49,12 @@ func NewGRPCServer(addr string, opts ...Opt) (*GRPCServer, error) {
 	for _, o := range opts {
 		o(srv)
 	}
-	return &srv, nil
+	srv.server = grpc.NewServer()
+	contract.RegisterKeeperServer(srv.server, &KeeperServer{})
+	return &srv
 }
 
-func (s *GRPCServer) Run() error {
-	s.server = grpc.NewServer(s.opts...)
-	contract.RegisterAuthServer(s.server, &AuthGRPCServer{})
-	contract.RegisterVaultServer(s.server, &VaultGRPCServer{})
-
+func (s *GRPCServer) Serve() error {
 	lis, err := net.Listen("tcp", s.addr)
 	if err != nil {
 		return fmt.Errorf("failed to listen GRPC on %s", s.addr)
@@ -91,4 +92,9 @@ func ensureValidToken(ctx context.Context, req any, info *grpc.UnaryServerInfo, 
 	}
 	// Continue execution of handler after ensuring a valid token.
 	return handler(ctx, req)
+}
+
+func (s *KeeperServer) Ping(_ context.Context, in *contract.Empty) (*contract.Empty, error) {
+	log.Info("ping")
+	return in, nil
 }

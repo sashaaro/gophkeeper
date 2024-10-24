@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/rs/zerolog v1.33.0
 	github.com/urfave/cli/v2 v2.27.3
+	golang.org/x/oauth2 v0.20.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.1
 )

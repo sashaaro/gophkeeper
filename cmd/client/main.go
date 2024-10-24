@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sashaaro/gophkeeper/internal/client"
+	"github.com/sashaaro/gophkeeper/internal/config"
 	"github.com/sashaaro/gophkeeper/internal/log"
 	"github.com/urfave/cli/v2"
 )
@@ -15,6 +17,21 @@ func main() {
 		Name:    "GophKeeper client",
 		Version: Version,
 		Usage:   "say a greeting",
+		Commands: []*cli.Command{
+			{
+				Name: "ping",
+				Action: func(ctx *cli.Context) error {
+					cfg := config.NewClient()
+					app := client.NewGRPCClient(cfg.ServerAddr, client.WithoutTLS())
+					defer func() {
+						if err := app.Stop(); err != nil {
+							log.Error("close grpc fail", log.Err(err))
+						}
+					}()
+					return app.Ping(ctx.Context)
+				},
+			},
+		},
 		Action: func(c *cli.Context) error {
 			fmt.Println("Greetings")
 			return nil

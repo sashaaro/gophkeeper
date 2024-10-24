@@ -83,13 +83,9 @@ message EntityList {
   repeated Entity Entity = 1;
 }
 
-service Auth {
+service Keeper {
   rpc Auth(Credentials) returns(Empty);
   rpc Register(Credentials) returns(Empty);
-}
-
-service Vault {
-  // Получить все свои секреты
   rpc GetAll(Empty) returns(EntityList);
   rpc CreateCredentials(CreateCreadentialsReq) returns(Entity);
   rpc CreateCreditCard(CreateCreditCardReq) returns(Entity);
@@ -97,4 +93,5 @@ service Vault {
   rpc CreateBinary(CreateBinaryReq) returns(Entity);
   rpc SendData(stream Chunk) returns(Empty);
   rpc ReceiveData(Entity) returns(stream Chunk);
+  rpc Ping(Empty) returns(Empty);
 }

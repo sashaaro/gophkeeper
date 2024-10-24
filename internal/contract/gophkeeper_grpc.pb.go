@@ -19,241 +19,137 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Auth_Auth_FullMethodName     = "/gophkeeper.Auth/Auth"
-	Auth_Register_FullMethodName = "/gophkeeper.Auth/Register"
+	Keeper_Auth_FullMethodName              = "/gophkeeper.Keeper/Auth"
+	Keeper_Register_FullMethodName          = "/gophkeeper.Keeper/Register"
+	Keeper_GetAll_FullMethodName            = "/gophkeeper.Keeper/GetAll"
+	Keeper_CreateCredentials_FullMethodName = "/gophkeeper.Keeper/CreateCredentials"
+	Keeper_CreateCreditCard_FullMethodName  = "/gophkeeper.Keeper/CreateCreditCard"
+	Keeper_CreateText_FullMethodName        = "/gophkeeper.Keeper/CreateText"
+	Keeper_CreateBinary_FullMethodName      = "/gophkeeper.Keeper/CreateBinary"
+	Keeper_SendData_FullMethodName          = "/gophkeeper.Keeper/SendData"
+	Keeper_ReceiveData_FullMethodName       = "/gophkeeper.Keeper/ReceiveData"
+	Keeper_Ping_FullMethodName              = "/gophkeeper.Keeper/Ping"
 )
 
-// AuthClient is the client API for Auth service.
+// KeeperClient is the client API for Keeper service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type AuthClient interface {
+type KeeperClient interface {
 	Auth(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Empty, error)
 	Register(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Empty, error)
-}
-
-type authClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewAuthClient(cc grpc.ClientConnInterface) AuthClient {
-	return &authClient{cc}
-}
-
-func (c *authClient) Auth(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, Auth_Auth_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authClient) Register(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, Auth_Register_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// AuthServer is the server API for Auth service.
-// All implementations must embed UnimplementedAuthServer
-// for forward compatibility
-type AuthServer interface {
-	Auth(context.Context, *Credentials) (*Empty, error)
-	Register(context.Context, *Credentials) (*Empty, error)
-	mustEmbedUnimplementedAuthServer()
-}
-
-// UnimplementedAuthServer must be embedded to have forward compatible implementations.
-type UnimplementedAuthServer struct {
-}
-
-func (UnimplementedAuthServer) Auth(context.Context, *Credentials) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
-}
-func (UnimplementedAuthServer) Register(context.Context, *Credentials) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
-}
-func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
-
-// UnsafeAuthServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to AuthServer will
-// result in compilation errors.
-type UnsafeAuthServer interface {
-	mustEmbedUnimplementedAuthServer()
-}
-
-func RegisterAuthServer(s grpc.ServiceRegistrar, srv AuthServer) {
-	s.RegisterService(&Auth_ServiceDesc, srv)
-}
-
-func _Auth_Auth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Credentials)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).Auth(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Auth_Auth_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).Auth(ctx, req.(*Credentials))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Auth_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Credentials)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).Register(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Auth_Register_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).Register(ctx, req.(*Credentials))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Auth_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gophkeeper.Auth",
-	HandlerType: (*AuthServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Auth",
-			Handler:    _Auth_Auth_Handler,
-		},
-		{
-			MethodName: "Register",
-			Handler:    _Auth_Register_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/contract/gophkeeper.proto",
-}
-
-const (
-	Vault_GetAll_FullMethodName            = "/gophkeeper.Vault/GetAll"
-	Vault_CreateCredentials_FullMethodName = "/gophkeeper.Vault/CreateCredentials"
-	Vault_CreateCreditCard_FullMethodName  = "/gophkeeper.Vault/CreateCreditCard"
-	Vault_CreateText_FullMethodName        = "/gophkeeper.Vault/CreateText"
-	Vault_CreateBinary_FullMethodName      = "/gophkeeper.Vault/CreateBinary"
-	Vault_SendData_FullMethodName          = "/gophkeeper.Vault/SendData"
-	Vault_ReceiveData_FullMethodName       = "/gophkeeper.Vault/ReceiveData"
-)
-
-// VaultClient is the client API for Vault service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type VaultClient interface {
-	// Получить все свои секреты
 	GetAll(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*EntityList, error)
 	CreateCredentials(ctx context.Context, in *CreateCreadentialsReq, opts ...grpc.CallOption) (*Entity, error)
 	CreateCreditCard(ctx context.Context, in *CreateCreditCardReq, opts ...grpc.CallOption) (*Entity, error)
 	CreateText(ctx context.Context, in *CreateTextReq, opts ...grpc.CallOption) (*Entity, error)
 	CreateBinary(ctx context.Context, in *CreateBinaryReq, opts ...grpc.CallOption) (*Entity, error)
-	SendData(ctx context.Context, opts ...grpc.CallOption) (Vault_SendDataClient, error)
-	ReceiveData(ctx context.Context, in *Entity, opts ...grpc.CallOption) (Vault_ReceiveDataClient, error)
+	SendData(ctx context.Context, opts ...grpc.CallOption) (Keeper_SendDataClient, error)
+	ReceiveData(ctx context.Context, in *Entity, opts ...grpc.CallOption) (Keeper_ReceiveDataClient, error)
+	Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
-type vaultClient struct {
+type keeperClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewVaultClient(cc grpc.ClientConnInterface) VaultClient {
-	return &vaultClient{cc}
+func NewKeeperClient(cc grpc.ClientConnInterface) KeeperClient {
+	return &keeperClient{cc}
 }
 
-func (c *vaultClient) GetAll(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*EntityList, error) {
+func (c *keeperClient) Auth(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Keeper_Auth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *keeperClient) Register(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Keeper_Register_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *keeperClient) GetAll(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*EntityList, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EntityList)
-	err := c.cc.Invoke(ctx, Vault_GetAll_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Keeper_GetAll_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *vaultClient) CreateCredentials(ctx context.Context, in *CreateCreadentialsReq, opts ...grpc.CallOption) (*Entity, error) {
+func (c *keeperClient) CreateCredentials(ctx context.Context, in *CreateCreadentialsReq, opts ...grpc.CallOption) (*Entity, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Entity)
-	err := c.cc.Invoke(ctx, Vault_CreateCredentials_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Keeper_CreateCredentials_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *vaultClient) CreateCreditCard(ctx context.Context, in *CreateCreditCardReq, opts ...grpc.CallOption) (*Entity, error) {
+func (c *keeperClient) CreateCreditCard(ctx context.Context, in *CreateCreditCardReq, opts ...grpc.CallOption) (*Entity, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Entity)
-	err := c.cc.Invoke(ctx, Vault_CreateCreditCard_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Keeper_CreateCreditCard_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *vaultClient) CreateText(ctx context.Context, in *CreateTextReq, opts ...grpc.CallOption) (*Entity, error) {
+func (c *keeperClient) CreateText(ctx context.Context, in *CreateTextReq, opts ...grpc.CallOption) (*Entity, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Entity)
-	err := c.cc.Invoke(ctx, Vault_CreateText_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Keeper_CreateText_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *vaultClient) CreateBinary(ctx context.Context, in *CreateBinaryReq, opts ...grpc.CallOption) (*Entity, error) {
+func (c *keeperClient) CreateBinary(ctx context.Context, in *CreateBinaryReq, opts ...grpc.CallOption) (*Entity, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Entity)
-	err := c.cc.Invoke(ctx, Vault_CreateBinary_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Keeper_CreateBinary_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *vaultClient) SendData(ctx context.Context, opts ...grpc.CallOption) (Vault_SendDataClient, error) {
+func (c *keeperClient) SendData(ctx context.Context, opts ...grpc.CallOption) (Keeper_SendDataClient, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Vault_ServiceDesc.Streams[0], Vault_SendData_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Keeper_ServiceDesc.Streams[0], Keeper_SendData_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &vaultSendDataClient{ClientStream: stream}
+	x := &keeperSendDataClient{ClientStream: stream}
 	return x, nil
 }
 
-type Vault_SendDataClient interface {
+type Keeper_SendDataClient interface {
 	Send(*Chunk) error
 	CloseAndRecv() (*Empty, error)
 	grpc.ClientStream
 }
 
-type vaultSendDataClient struct {
+type keeperSendDataClient struct {
 	grpc.ClientStream
 }
 
-func (x *vaultSendDataClient) Send(m *Chunk) error {
+func (x *keeperSendDataClient) Send(m *Chunk) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *vaultSendDataClient) CloseAndRecv() (*Empty, error) {
+func (x *keeperSendDataClient) CloseAndRecv() (*Empty, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
@@ -264,13 +160,13 @@ func (x *vaultSendDataClient) CloseAndRecv() (*Empty, error) {
 	return m, nil
 }
 
-func (c *vaultClient) ReceiveData(ctx context.Context, in *Entity, opts ...grpc.CallOption) (Vault_ReceiveDataClient, error) {
+func (c *keeperClient) ReceiveData(ctx context.Context, in *Entity, opts ...grpc.CallOption) (Keeper_ReceiveDataClient, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Vault_ServiceDesc.Streams[1], Vault_ReceiveData_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Keeper_ServiceDesc.Streams[1], Keeper_ReceiveData_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &vaultReceiveDataClient{ClientStream: stream}
+	x := &keeperReceiveDataClient{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -280,16 +176,16 @@ func (c *vaultClient) ReceiveData(ctx context.Context, in *Entity, opts ...grpc.
 	return x, nil
 }
 
-type Vault_ReceiveDataClient interface {
+type Keeper_ReceiveDataClient interface {
 	Recv() (*Chunk, error)
 	grpc.ClientStream
 }
 
-type vaultReceiveDataClient struct {
+type keeperReceiveDataClient struct {
 	grpc.ClientStream
 }
 
-func (x *vaultReceiveDataClient) Recv() (*Chunk, error) {
+func (x *keeperReceiveDataClient) Recv() (*Chunk, error) {
 	m := new(Chunk)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -297,168 +193,225 @@ func (x *vaultReceiveDataClient) Recv() (*Chunk, error) {
 	return m, nil
 }
 
-// VaultServer is the server API for Vault service.
-// All implementations must embed UnimplementedVaultServer
+func (c *keeperClient) Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Keeper_Ping_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// KeeperServer is the server API for Keeper service.
+// All implementations must embed UnimplementedKeeperServer
 // for forward compatibility
-type VaultServer interface {
-	// Получить все свои секреты
+type KeeperServer interface {
+	Auth(context.Context, *Credentials) (*Empty, error)
+	Register(context.Context, *Credentials) (*Empty, error)
 	GetAll(context.Context, *Empty) (*EntityList, error)
 	CreateCredentials(context.Context, *CreateCreadentialsReq) (*Entity, error)
 	CreateCreditCard(context.Context, *CreateCreditCardReq) (*Entity, error)
 	CreateText(context.Context, *CreateTextReq) (*Entity, error)
 	CreateBinary(context.Context, *CreateBinaryReq) (*Entity, error)
-	SendData(Vault_SendDataServer) error
-	ReceiveData(*Entity, Vault_ReceiveDataServer) error
-	mustEmbedUnimplementedVaultServer()
+	SendData(Keeper_SendDataServer) error
+	ReceiveData(*Entity, Keeper_ReceiveDataServer) error
+	Ping(context.Context, *Empty) (*Empty, error)
+	mustEmbedUnimplementedKeeperServer()
 }
 
-// UnimplementedVaultServer must be embedded to have forward compatible implementations.
-type UnimplementedVaultServer struct {
+// UnimplementedKeeperServer must be embedded to have forward compatible implementations.
+type UnimplementedKeeperServer struct {
 }
 
-func (UnimplementedVaultServer) GetAll(context.Context, *Empty) (*EntityList, error) {
+func (UnimplementedKeeperServer) Auth(context.Context, *Credentials) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
+}
+func (UnimplementedKeeperServer) Register(context.Context, *Credentials) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedKeeperServer) GetAll(context.Context, *Empty) (*EntityList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
-func (UnimplementedVaultServer) CreateCredentials(context.Context, *CreateCreadentialsReq) (*Entity, error) {
+func (UnimplementedKeeperServer) CreateCredentials(context.Context, *CreateCreadentialsReq) (*Entity, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCredentials not implemented")
 }
-func (UnimplementedVaultServer) CreateCreditCard(context.Context, *CreateCreditCardReq) (*Entity, error) {
+func (UnimplementedKeeperServer) CreateCreditCard(context.Context, *CreateCreditCardReq) (*Entity, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCreditCard not implemented")
 }
-func (UnimplementedVaultServer) CreateText(context.Context, *CreateTextReq) (*Entity, error) {
+func (UnimplementedKeeperServer) CreateText(context.Context, *CreateTextReq) (*Entity, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateText not implemented")
 }
-func (UnimplementedVaultServer) CreateBinary(context.Context, *CreateBinaryReq) (*Entity, error) {
+func (UnimplementedKeeperServer) CreateBinary(context.Context, *CreateBinaryReq) (*Entity, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBinary not implemented")
 }
-func (UnimplementedVaultServer) SendData(Vault_SendDataServer) error {
+func (UnimplementedKeeperServer) SendData(Keeper_SendDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendData not implemented")
 }
-func (UnimplementedVaultServer) ReceiveData(*Entity, Vault_ReceiveDataServer) error {
+func (UnimplementedKeeperServer) ReceiveData(*Entity, Keeper_ReceiveDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method ReceiveData not implemented")
 }
-func (UnimplementedVaultServer) mustEmbedUnimplementedVaultServer() {}
+func (UnimplementedKeeperServer) Ping(context.Context, *Empty) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (UnimplementedKeeperServer) mustEmbedUnimplementedKeeperServer() {}
 
-// UnsafeVaultServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to VaultServer will
+// UnsafeKeeperServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to KeeperServer will
 // result in compilation errors.
-type UnsafeVaultServer interface {
-	mustEmbedUnimplementedVaultServer()
+type UnsafeKeeperServer interface {
+	mustEmbedUnimplementedKeeperServer()
 }
 
-func RegisterVaultServer(s grpc.ServiceRegistrar, srv VaultServer) {
-	s.RegisterService(&Vault_ServiceDesc, srv)
+func RegisterKeeperServer(s grpc.ServiceRegistrar, srv KeeperServer) {
+	s.RegisterService(&Keeper_ServiceDesc, srv)
 }
 
-func _Vault_GetAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Keeper_Auth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Credentials)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KeeperServer).Auth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Keeper_Auth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KeeperServer).Auth(ctx, req.(*Credentials))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Keeper_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Credentials)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KeeperServer).Register(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Keeper_Register_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KeeperServer).Register(ctx, req.(*Credentials))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Keeper_GetAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VaultServer).GetAll(ctx, in)
+		return srv.(KeeperServer).GetAll(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Vault_GetAll_FullMethodName,
+		FullMethod: Keeper_GetAll_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VaultServer).GetAll(ctx, req.(*Empty))
+		return srv.(KeeperServer).GetAll(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Vault_CreateCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Keeper_CreateCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateCreadentialsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VaultServer).CreateCredentials(ctx, in)
+		return srv.(KeeperServer).CreateCredentials(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Vault_CreateCredentials_FullMethodName,
+		FullMethod: Keeper_CreateCredentials_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VaultServer).CreateCredentials(ctx, req.(*CreateCreadentialsReq))
+		return srv.(KeeperServer).CreateCredentials(ctx, req.(*CreateCreadentialsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Vault_CreateCreditCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Keeper_CreateCreditCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateCreditCardReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VaultServer).CreateCreditCard(ctx, in)
+		return srv.(KeeperServer).CreateCreditCard(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Vault_CreateCreditCard_FullMethodName,
+		FullMethod: Keeper_CreateCreditCard_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VaultServer).CreateCreditCard(ctx, req.(*CreateCreditCardReq))
+		return srv.(KeeperServer).CreateCreditCard(ctx, req.(*CreateCreditCardReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Vault_CreateText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Keeper_CreateText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateTextReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VaultServer).CreateText(ctx, in)
+		return srv.(KeeperServer).CreateText(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Vault_CreateText_FullMethodName,
+		FullMethod: Keeper_CreateText_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VaultServer).CreateText(ctx, req.(*CreateTextReq))
+		return srv.(KeeperServer).CreateText(ctx, req.(*CreateTextReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Vault_CreateBinary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Keeper_CreateBinary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateBinaryReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VaultServer).CreateBinary(ctx, in)
+		return srv.(KeeperServer).CreateBinary(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Vault_CreateBinary_FullMethodName,
+		FullMethod: Keeper_CreateBinary_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VaultServer).CreateBinary(ctx, req.(*CreateBinaryReq))
+		return srv.(KeeperServer).CreateBinary(ctx, req.(*CreateBinaryReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Vault_SendData_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(VaultServer).SendData(&vaultSendDataServer{ServerStream: stream})
+func _Keeper_SendData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(KeeperServer).SendData(&keeperSendDataServer{ServerStream: stream})
 }
 
-type Vault_SendDataServer interface {
+type Keeper_SendDataServer interface {
 	SendAndClose(*Empty) error
 	Recv() (*Chunk, error)
 	grpc.ServerStream
 }
 
-type vaultSendDataServer struct {
+type keeperSendDataServer struct {
 	grpc.ServerStream
 }
 
-func (x *vaultSendDataServer) SendAndClose(m *Empty) error {
+func (x *keeperSendDataServer) SendAndClose(m *Empty) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *vaultSendDataServer) Recv() (*Chunk, error) {
+func (x *keeperSendDataServer) Recv() (*Chunk, error) {
 	m := new(Chunk)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -466,64 +419,94 @@ func (x *vaultSendDataServer) Recv() (*Chunk, error) {
 	return m, nil
 }
 
-func _Vault_ReceiveData_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Keeper_ReceiveData_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Entity)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(VaultServer).ReceiveData(m, &vaultReceiveDataServer{ServerStream: stream})
+	return srv.(KeeperServer).ReceiveData(m, &keeperReceiveDataServer{ServerStream: stream})
 }
 
-type Vault_ReceiveDataServer interface {
+type Keeper_ReceiveDataServer interface {
 	Send(*Chunk) error
 	grpc.ServerStream
 }
 
-type vaultReceiveDataServer struct {
+type keeperReceiveDataServer struct {
 	grpc.ServerStream
 }
 
-func (x *vaultReceiveDataServer) Send(m *Chunk) error {
+func (x *keeperReceiveDataServer) Send(m *Chunk) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// Vault_ServiceDesc is the grpc.ServiceDesc for Vault service.
+func _Keeper_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KeeperServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Keeper_Ping_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KeeperServer).Ping(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Keeper_ServiceDesc is the grpc.ServiceDesc for Keeper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Vault_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gophkeeper.Vault",
-	HandlerType: (*VaultServer)(nil),
+var Keeper_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "gophkeeper.Keeper",
+	HandlerType: (*KeeperServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Auth",
+			Handler:    _Keeper_Auth_Handler,
+		},
+		{
+			MethodName: "Register",
+			Handler:    _Keeper_Register_Handler,
+		},
+		{
 			MethodName: "GetAll",
-			Handler:    _Vault_GetAll_Handler,
+			Handler:    _Keeper_GetAll_Handler,
 		},
 		{
 			MethodName: "CreateCredentials",
-			Handler:    _Vault_CreateCredentials_Handler,
+			Handler:    _Keeper_CreateCredentials_Handler,
 		},
 		{
 			MethodName: "CreateCreditCard",
-			Handler:    _Vault_CreateCreditCard_Handler,
+			Handler:    _Keeper_CreateCreditCard_Handler,
 		},
 		{
 			MethodName: "CreateText",
-			Handler:    _Vault_CreateText_Handler,
+			Handler:    _Keeper_CreateText_Handler,
 		},
 		{
 			MethodName: "CreateBinary",
-			Handler:    _Vault_CreateBinary_Handler,
+			Handler:    _Keeper_CreateBinary_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _Keeper_Ping_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "SendData",
-			Handler:       _Vault_SendData_Handler,
+			Handler:       _Keeper_SendData_Handler,
 			ClientStreams: true,
 		},
 		{
 			StreamName:    "ReceiveData",
-			Handler:       _Vault_ReceiveData_Handler,
+			Handler:       _Keeper_ReceiveData_Handler,
 			ServerStreams: true,
 		},
 	},

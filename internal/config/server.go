@@ -6,12 +6,12 @@ const DefaultServerListen = ":9876"
 
 type Server struct {
 	Listen string
-	TLS    ssl.Config
+	TLS    ssl.ServerConfig
 }
 
 func NewServer() *Server {
 	return &Server{
 		Listen: DefaultServerListen,
-		TLS:    ssl.Config{},
+		TLS:    ssl.ServerConfig{},
 	}
 }

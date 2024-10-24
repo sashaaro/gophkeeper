@@ -12,7 +12,7 @@ func init() {
 	basepath = filepath.Dir(currentFile)
 }
 
-func (c *Config) path(rel string) string {
+func realPath(rel string) string {
 	if filepath.IsAbs(rel) {
 		return rel
 	}
