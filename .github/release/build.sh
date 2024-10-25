@@ -39,12 +39,14 @@ uploadAsset() {
     -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/octet-stream" \
     "https://uploads.github.com/repos/sashaaro/gophkeeper/releases/${ID}/assets?name=${FILENAME}" \
-    --data-binary "@./build/${FILENAME}"
+    --data-binary "@${FILENAME}"
 }
 
 echo "Create Release"
 RELEASE_ID=`createRelease | grep -oP '(?<="id": )([^,]*)'`
 echo "Created RELEASE_ID: ${RELEASE_ID}"
+cd ./build
+ls -la
 uploadAsset "${RELEASE_ID}" "client-linux-amd64.${APP_VERSION}.tar.gz"
 uploadAsset "${RELEASE_ID}" "client-darwin-amd64.${APP_VERSION}.tar.gz"
 uploadAsset "${RELEASE_ID}" "client-windows-amd64.${APP_VERSION}.tar.gz"
