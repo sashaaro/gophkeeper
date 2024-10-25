@@ -45,6 +45,6 @@ uploadAsset() {
 echo "Create Release"
 RELEASE_ID=`createRelease | grep -oP '(?<="id": )([^,]*)'`
 echo "Created RELEASE_ID: ${RELEASE_ID}"
-uploadAsset $RELEASE_ID client-linux-amd64.${APP_VERSION}.tar.gz
-uploadAsset $RELEASE_ID client-darwin-amd64.${APP_VERSION}.tar.gz
-uploadAsset $RELEASE_ID client-windows-amd64.${APP_VERSION}.tar.gz
+uploadAsset "${RELEASE_ID}" "client-linux-amd64.${APP_VERSION}.tar.gz"
+uploadAsset "${RELEASE_ID}" "client-darwin-amd64.${APP_VERSION}.tar.gz"
+uploadAsset "${RELEASE_ID}" "client-windows-amd64.${APP_VERSION}.tar.gz"
