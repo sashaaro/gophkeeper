@@ -45,7 +45,7 @@ uploadAsset() {
 }
 
 echo "Create Release"
-RELEASE_ID=`createRelease | grep -oP '(?<="id": )([^,]*)'`
+RELEASE_ID=`createRelease | grep -m1 -oP '(?<="id": )([^,]*)'`
 echo "Created RELEASE_ID: ${RELEASE_ID}"
 cd ./build
 ls -la
