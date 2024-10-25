@@ -31,14 +31,16 @@ createRelease() {
 uploadAsset() {
   local ID=$1
   local FILENAME=$2
+  local url=https://uploads.github.com/repos/sashaaro/gophkeeper/releases/${ID}/assets?name=${FILENAME}
   echo "Upload asset ${FILENAME} to release ${ID}"
-  curl -L \
+  echo "POST ${url}"
+  curl -sf \
     -X POST \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/octet-stream" \
-    "https://uploads.github.com/repos/sashaaro/gophkeeper/releases/${ID}/assets?name=${FILENAME}" \
+    "${url}" \
     --data-binary "@${FILENAME}"
 }
 
