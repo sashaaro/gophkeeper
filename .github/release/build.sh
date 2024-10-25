@@ -7,11 +7,11 @@ rm -rf ./build
 mkdir ./build
 export CGO_ENABLED=0
 echo "Build linux"
-GOOS=linux GOARCH=amd64 go build -ldflags="-X main.appVersion=${APP_VERSION}" -o ./build/client-linux-amd64 -v ./cmd/client
+GOOS=linux GOARCH=amd64 go build -ldflags="-X main.Version=${APP_VERSION}" -o ./build/client-linux-amd64 -v ./cmd/client
 echo "Build Mac"
-GOOS=darwin GOARCH=amd64 go build -ldflags="-X main.appVersion=${APP_VERSION}" -o ./build/client-darwin-amd64 -v ./cmd/client
+GOOS=darwin GOARCH=amd64 go build -ldflags="-X main.Version=${APP_VERSION}" -o ./build/client-darwin-amd64 -v ./cmd/client
 echo "Build Windows"
-GOOS=windows GOARCH=amd64 go build -ldflags="-X main.appVersion=${APP_VERSION}" -o ./build/client-windows-amd64.exe -v ./cmd/client
+GOOS=windows GOARCH=amd64 go build -ldflags="-X main.Version=${APP_VERSION}" -o ./build/client-windows-amd64.exe -v ./cmd/client
 echo "Gzip binaries"
 tar -czf ./build/client-linux-amd64.${APP_VERSION}.tar.gz ./build/client-linux-amd64
 tar -czf ./build/client-darwin-amd64.${APP_VERSION}.tar.gz ./build/client-darwin-amd64
