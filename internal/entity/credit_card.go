@@ -7,6 +7,7 @@ import (
 )
 
 type CreditCard struct {
+	Secret
 	Number string
 	Date   string
 	Name   string

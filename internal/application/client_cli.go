@@ -15,6 +15,7 @@ type Pinger interface {
 }
 
 func NewClientCLI(version string, cfg *config.Client) *cli.App {
+	var grpcClient *client.GRPCClient
 	return &cli.App{
 		Name:    "GophKeeper client",
 		Version: version,
@@ -23,18 +24,41 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 			{
 				Name: "ping",
 				Action: func(ctx *cli.Context) error {
-					grpcClient := client.NewGRPCClient(cfg.ServerAddr, client.WithoutTLS())
-					defer func() {
-						if err := grpcClient.Close(); err != nil {
-							log.Error("close grpc fail", log.Err(err))
-						}
-					}()
-					return grpcClient.Ping(ctx.Context)
+					if err := grpcClient.Ping(ctx.Context); err != nil {
+						fmt.Printf("Fails. %v\n", err)
+					}
+					fmt.Println("PONG")
+					return nil
+				},
+			},
+			{
+				Name:      "register",
+				ArgsUsage: "{login} {password}", // @fixme Небезопасно оставлять пароль в истории cli
+				Action: func(ctx *cli.Context) error {
+					//	login := ctx.Args().Get(0)
+					//	password := ctx.Args().Get(1)
+					//	user := entity.User{
+					//		Login:    login,
+					//		Password: password,
+					//	}
+
+					if err := grpcClient.Ping(ctx.Context); err != nil {
+						fmt.Printf("Fails. %v\n", err)
+					}
+					fmt.Println("PONG")
+					return nil
 				},
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Before: func(c *cli.Context) error {
+			grpcClient = client.NewGRPCClient(cfg.ServerAddr, client.WithoutTLS())
 			fmt.Printf("GophKeeper %s\n", c.App.Version)
+			return nil
+		},
+		After: func(c *cli.Context) error {
+			if err := grpcClient.Close(); err != nil {
+				log.Error("close grpc fail", log.Err(err))
+			}
 			return nil
 		},
 	}
