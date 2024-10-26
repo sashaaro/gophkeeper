@@ -12,7 +12,7 @@ test: ## Run tests
 
 coverage: ## Run tests with coverage report
 	go test -race -cover -coverprofile=coverage.out `go list ./... | grep -v "/cmd/" | grep -v "/tests/mock/"`
-	sed -i '/\(\/cmd\/\|\/mock\/\|\.pb\.go\)/d' coverage.out
+	sed -i '/\(\/cmd\/\|\/mocks\/\|\.pb\.go\)/d' coverage.out
 	go tool cover -func=coverage.out
 
 protoc: ## Generate package from proto files

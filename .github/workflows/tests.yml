@@ -18,5 +18,5 @@ jobs:
       - name: Run tests
         run: |
           go test -race -cover -coverprofile=coverage.out ./...
-          sed -i "/\(\/cmd\/\|\/internal\/application\/\|\/internal\/config\/\)/d" coverage.out
+          sed -i '/\(\/cmd\/\|\/mocks\/\|\.pb\.go\)/d' coverage.out
           go tool cover -func=coverage.out
