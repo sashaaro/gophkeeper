@@ -49,7 +49,7 @@ linters:
 
 issues:
   exclude-files:
-    - ".*_mock_test\.go"
+    - ".*_mock_test\\.go$"
   exclude-rules:
     # Exclude some linters
     - path: tests
