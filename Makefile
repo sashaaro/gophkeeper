@@ -19,3 +19,6 @@ protoc:
 
 lint:
 	golangci-lint run
+
+installDevTools:
+	go install -mod mod github.com/golang/mock/mockgen@v1.6.0
