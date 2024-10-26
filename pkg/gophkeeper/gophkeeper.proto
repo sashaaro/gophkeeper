@@ -86,6 +86,7 @@ message EntityList {
 
 message AuthToken {
   string jwt = 1;
+  string userID = 2;
 }
 
 service AuthService {

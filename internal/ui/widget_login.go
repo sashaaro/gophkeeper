@@ -2,27 +2,26 @@ package ui
 
 import "github.com/rivo/tview"
 
-type RegisterForm struct {
+type LoginForm struct {
 	Login    string
 	Password string
 }
 
-type OnRegister func(form RegisterForm)
-type OnCancel func()
+type OnLogin func(form LoginForm)
 
-type WidgetRegisterForm struct {
-	form       *tview.Form
-	model      RegisterForm
-	onRegister OnRegister
-	onCancel   OnCancel
+type WidgetLoginForm struct {
+	form     *tview.Form
+	model    LoginForm
+	onLogin  OnLogin
+	onCancel OnCancel
 }
 
-func NewWidgetRegister(onRegister OnRegister, onCancel OnCancel) *WidgetRegisterForm {
-	w := WidgetRegisterForm{
-		form:       tview.NewForm(),
-		model:      RegisterForm{},
-		onRegister: onRegister,
-		onCancel:   onCancel,
+func NewWidgetLogin(onLogin OnLogin, onCancel OnCancel) *WidgetLoginForm {
+	w := WidgetLoginForm{
+		form:     tview.NewForm(),
+		model:    LoginForm{},
+		onLogin:  onLogin,
+		onCancel: onCancel,
 	}
 	w.form.AddInputField("Login", "", 20, nil, func(text string) {
 		w.model.Login = text
@@ -30,9 +29,9 @@ func NewWidgetRegister(onRegister OnRegister, onCancel OnCancel) *WidgetRegister
 	w.form.AddPasswordField("Password", "", 20, '*', func(text string) {
 		w.model.Password = text
 	})
-	w.form.AddButton("Register", func() {
-		if w.onRegister != nil {
-			w.onRegister(w.model)
+	w.form.AddButton("Login", func() {
+		if w.onLogin != nil {
+			w.onLogin(w.model)
 		}
 	})
 	w.form.AddButton("Cancel", func() {
@@ -43,7 +42,7 @@ func NewWidgetRegister(onRegister OnRegister, onCancel OnCancel) *WidgetRegister
 	return &w
 }
 
-func (w *WidgetRegisterForm) Reset() {
+func (w *WidgetLoginForm) Reset() {
 	l := w.form.GetFormItemByLabel("Login")
 	if f, ok := l.(*tview.InputField); ok {
 		f.SetText("")

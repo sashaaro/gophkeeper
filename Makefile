@@ -10,6 +10,9 @@ clean: ## Remove temporary files
 test: ## Run tests
 	go test ./...
 
+certs: ## Create server and client certificates
+	cd data && ./create.sh
+
 coverage: ## Run tests with coverage report
 	go test -race -cover -coverprofile=coverage.out `go list ./... | grep -v "/cmd/" | grep -v "/tests/mock/"`
 	sed -i '/\(\/cmd\/\|\/mocks\/\|\.pb\.go\)/d' coverage.out

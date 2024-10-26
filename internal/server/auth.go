@@ -41,7 +41,7 @@ func (s *AuthServer) Login(ctx context.Context, in *gophkeeper.Credentials) (*go
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
-	return &gophkeeper.AuthToken{Jwt: t}, nil
+	return &gophkeeper.AuthToken{Jwt: t, UserID: u.ID.String()}, nil
 }
 
 func (s *AuthServer) Register(ctx context.Context, in *gophkeeper.Credentials) (*gophkeeper.AuthToken, error) {
@@ -53,5 +53,5 @@ func (s *AuthServer) Register(ctx context.Context, in *gophkeeper.Credentials) (
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
-	return &gophkeeper.AuthToken{Jwt: t}, nil
+	return &gophkeeper.AuthToken{Jwt: t, UserID: u.ID.String()}, nil
 }

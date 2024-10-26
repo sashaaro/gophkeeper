@@ -8,7 +8,11 @@ type WidgetMainMenu struct {
 
 func NewWidgetMainMenu() *WidgetMainMenu {
 	v := tview.NewTextView()
-	v.SetText(`(r) Register`)
+	v.SetText(`(r) Register
+(p) Ping
+(l) Login
+(q) Quit
+`)
 
 	return &WidgetMainMenu{
 		primitive: v,

@@ -31,6 +31,7 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 						return err
 					}
 					authService := auth.NewAuthenticator(jwtSvc)
+					// @TODO через конфиг надо
 					db, err := postgres.NewConn(`postgres://postgres:postgres@127.0.0.1:5432/keeper`)
 					if err != nil {
 						log.Error("create user. fail connect db", log.Err(err))
@@ -39,7 +40,15 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 					passwordHasher := hasher.NewHasher()
 					userRepo := postgres.NewUserRepository(db)
 					userSvc := service.NewUserService(passwordHasher, userRepo)
-					grpcServer := server.NewGRPCServer(cfg.Listen, userSvc, jwtSvc, server.WithAuth(authService), server.WithoutTLS())
+					cert, err := cfg.TLS.Certificate()
+					if err != nil {
+						log.Panic("failed to load key pair: %s", log.Err(err))
+					}
+					opts := []server.Opt{
+						server.WithAuth(authService),
+						server.WithTLS(cert),
+					}
+					grpcServer := server.NewGRPCServer(cfg.Listen, userSvc, jwtSvc, opts...)
 					if err := grpcServer.Serve(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 						return err
 					}

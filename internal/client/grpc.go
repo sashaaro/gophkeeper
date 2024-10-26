@@ -3,16 +3,22 @@ package client
 import (
 	"context"
 
+	"github.com/sashaaro/gophkeeper/internal/log"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials/oauth"
 
 	"github.com/sashaaro/gophkeeper/pkg/gophkeeper"
 )
 
+// GRPCClient - Реализация клиента к серверу по grpc.
+// Знает только о grpc контрактах и ни о чём другом. Всё что связано с логикой приложения, слоем выше.
 type GRPCClient struct {
 	serverAddr    string
 	dialOpts      []grpc.DialOption
+	authToken     string
 	conn          *grpc.ClientConn
 	_keeperClient gophkeeper.KeeperServiceClient
 	_authClient   gophkeeper.AuthServiceClient
@@ -42,6 +48,23 @@ func WithoutTLS() Opt {
 	}
 }
 
+func (c *GRPCClient) ReInitWithAuth(token string) error {
+	c.authToken = token
+	return c.ReInit()
+}
+
+func (c *GRPCClient) ReInit() error {
+	log.Info("Re init grpc connection")
+	if err := c.conn.Close(); err != nil {
+		return err
+	}
+	log.Info("Old grpc connection is closed")
+	c.conn = nil
+	c._keeperClient = nil
+	c._authClient = nil
+	return nil
+}
+
 func (c *GRPCClient) Ping(ctx context.Context) error {
 	a, err := c.keeperClient()
 	if err != nil {
@@ -51,22 +74,28 @@ func (c *GRPCClient) Ping(ctx context.Context) error {
 	return err
 }
 
-func (c *GRPCClient) Register(ctx context.Context, login, password string) error {
+func (c *GRPCClient) Register(ctx context.Context, login, password string) (jwtToken string, err error) {
 	a, err := c.authClient()
 	if err != nil {
-		return err
+		return "", err
 	}
-	_, err = a.Register(ctx, &gophkeeper.Credentials{Login: login, Password: password})
-	return err
+	resp, err := a.Register(ctx, &gophkeeper.Credentials{Login: login, Password: password})
+	if err != nil {
+		return "", err
+	}
+	return resp.Jwt, nil
 }
 
-func (c *GRPCClient) Login(ctx context.Context, login, password string) error {
+func (c *GRPCClient) Login(ctx context.Context, login, password string) (tokenString string, err error) {
 	a, err := c.authClient()
 	if err != nil {
-		return err
+		return "", err
 	}
-	_, err = a.Login(ctx, &gophkeeper.Credentials{Login: login, Password: password})
-	return err
+	resp, err := a.Login(ctx, &gophkeeper.Credentials{Login: login, Password: password})
+	if err != nil {
+		return "", err
+	}
+	return resp.Jwt, err
 }
 
 func (c *GRPCClient) keeperClient() (gophkeeper.KeeperServiceClient, error) {
@@ -96,7 +125,17 @@ func (c *GRPCClient) connect() (grpc.ClientConnInterface, error) {
 		return c.conn, nil
 	}
 
-	conn, err := grpc.NewClient(c.serverAddr, c.dialOpts...)
+	opts := c.dialOpts
+	if c.authToken != "" {
+		opts = append(opts, grpc.WithPerRPCCredentials(
+			oauth.TokenSource{TokenSource: oauth2.StaticTokenSource(
+				&oauth2.Token{
+					AccessToken: c.authToken,
+				},
+			)},
+		))
+	}
+	conn, err := grpc.NewClient(c.serverAddr, opts...)
 	if err != nil {
 		return nil, err
 	}

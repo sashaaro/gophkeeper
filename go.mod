@@ -3,22 +3,26 @@ module github.com/sashaaro/gophkeeper
 go 1.22
 
 require (
+	github.com/gdamore/tcell/v2 v2.7.1
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.6.0
+	github.com/rivo/tview v0.0.0-20240818110301-fd649dbf1223
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.3
+	golang.org/x/crypto v0.23.0
+	golang.org/x/oauth2 v0.20.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.1
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
-	github.com/gdamore/tcell/v2 v2.7.1 // indirect
-	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
@@ -28,12 +32,10 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rivo/tview v0.0.0-20240818110301-fd649dbf1223 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect

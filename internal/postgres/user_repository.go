@@ -32,7 +32,7 @@ func (r *UserRepository) Create(ctx context.Context, m *entity.User) error {
 
 func (r *UserRepository) Get(ctx context.Context, id uuid.UUID, m *entity.User) error {
 	if m == nil {
-		m = &entity.User{}
+		return errors.New("model should not be nil")
 	}
 	row := r.db.QueryRowContext(ctx, `SELECT id, login, pass FROM "user" WHERE id = $1`, id)
 	if err := row.Err(); err != nil {
@@ -41,12 +41,12 @@ func (r *UserRepository) Get(ctx context.Context, id uuid.UUID, m *entity.User) 
 		}
 		return err
 	}
-	return row.Scan(m.ID, m.Login, m.Password)
+	return row.Scan(&m.ID, &m.Login, &m.Password)
 }
 
 func (r *UserRepository) GetByLogin(ctx context.Context, login string, m *entity.User) error {
 	if m == nil {
-		m = &entity.User{}
+		return errors.New("model should not be nil")
 	}
 	row := r.db.QueryRowContext(ctx, `SELECT id, login, pass FROM "user" WHERE login = $1`, login)
 	if err := row.Err(); err != nil {
@@ -55,5 +55,5 @@ func (r *UserRepository) GetByLogin(ctx context.Context, login string, m *entity
 		}
 		return err
 	}
-	return row.Scan(m.ID, m.Login, m.Password)
+	return row.Scan(&m.ID, &m.Login, &m.Password)
 }

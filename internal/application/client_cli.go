@@ -16,7 +16,6 @@ type Pinger interface {
 }
 
 func NewClientCLI(version string, cfg *config.Client) *cli.App {
-	var grpcClient *client.GRPCClient
 	return &cli.App{
 		Name:    "GophKeeper client",
 		Version: version,
@@ -25,7 +24,9 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 			{
 				Name: "ui",
 				Action: func(c *cli.Context) error {
-					uiApp := ui.NewUIApp(client.NewClient(cfg))
+					cl := client.NewClient(cfg)
+					defer cl.Close()
+					uiApp := ui.NewUIApp(cl)
 					uiApp.Init()
 					return uiApp.Run()
 				},
@@ -33,7 +34,9 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 			{
 				Name: "ping",
 				Action: func(ctx *cli.Context) error {
-					if err := grpcClient.Ping(ctx.Context); err != nil {
+					cl := client.NewClient(cfg)
+					defer cl.Close()
+					if err := cl.Ping(ctx.Context); err != nil {
 						fmt.Printf("Fails. %v\n", err)
 					}
 					fmt.Println("PONG")
@@ -46,7 +49,9 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 				Action: func(ctx *cli.Context) error {
 					login := ctx.Args().Get(0)
 					password := ctx.Args().Get(1)
-					if err := grpcClient.Register(ctx.Context, login, password); err != nil {
+					cl := client.NewClient(cfg)
+					defer cl.Close()
+					if err := cl.Register(ctx.Context, login, password); err != nil {
 						return err
 					}
 					log.Info("Registered")
@@ -55,14 +60,7 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 			},
 		},
 		Before: func(c *cli.Context) error {
-			grpcClient = client.NewGRPCClient(cfg.ServerAddr, client.WithoutTLS())
 			fmt.Printf("GophKeeper %s\n", c.App.Version)
-			return nil
-		},
-		After: func(c *cli.Context) error {
-			if err := grpcClient.Close(); err != nil {
-				log.Error("close grpc fail", log.Err(err))
-			}
 			return nil
 		},
 	}
