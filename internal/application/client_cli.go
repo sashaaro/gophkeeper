@@ -7,6 +7,7 @@ import (
 	"github.com/sashaaro/gophkeeper/internal/client"
 	"github.com/sashaaro/gophkeeper/internal/config"
 	"github.com/sashaaro/gophkeeper/internal/log"
+	ui2 "github.com/sashaaro/gophkeeper/internal/ui"
 	"github.com/urfave/cli/v2"
 )
 
@@ -21,6 +22,14 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 		Version: version,
 		Usage:   "say a greeting",
 		Commands: []*cli.Command{
+			{
+				Name: "ui",
+				Action: func(c *cli.Context) error {
+					ui := ui2.NewUIApp()
+					ui.Init()
+					return ui.Run()
+				},
+			},
 			{
 				Name: "ping",
 				Action: func(ctx *cli.Context) error {

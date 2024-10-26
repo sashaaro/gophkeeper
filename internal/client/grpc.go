@@ -67,5 +67,8 @@ func (c *GRPCClient) connect() (grpc.ClientConnInterface, error) {
 }
 
 func (c *GRPCClient) Close() error {
+	if c == nil || c.conn == nil {
+		return nil
+	}
 	return c.conn.Close()
 }
