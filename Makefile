@@ -22,4 +22,5 @@ lint: ## Static check
 	golangci-lint run
 
 installDevTools:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
 	go install -mod mod github.com/golang/mock/mockgen@v1.6.0
