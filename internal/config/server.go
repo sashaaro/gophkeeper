@@ -11,7 +11,10 @@ type Server struct {
 
 func NewServer() *Server {
 	return &Server{
-		Listen: DefaultServerListen,
-		TLS:    ssl.ServerConfig{},
+		Listen: getEnv("LISTEN", DefaultServerListen),
+		TLS: ssl.ServerConfig{
+			PublicKeyPath:  getEnv("TLS_PUBLIC_KEY_PATH", ""),
+			PrivateKeyPath: getEnv("TLS_PRIVATE_KEY_PATH", ""),
+		},
 	}
 }

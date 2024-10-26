@@ -8,6 +8,6 @@ type Client struct {
 
 func NewClient() *Client {
 	return &Client{
-		ServerAddr: DefaultServerAddress,
+		ServerAddr: getEnv("SERVER_ADDR", DefaultServerAddress),
 	}
 }

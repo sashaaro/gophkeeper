@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v3.12.4
-// source: internal/contract/gophkeeper.proto
+// source: pkg/gophkeeper/gophkeeper.proto
 
-package contract
+package gophkeeper
 
 import (
 	context "context"
@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Keeper_Auth_FullMethodName              = "/gophkeeper.Keeper/Auth"
-	Keeper_Register_FullMethodName          = "/gophkeeper.Keeper/Register"
-	Keeper_GetAll_FullMethodName            = "/gophkeeper.Keeper/GetAll"
-	Keeper_CreateCredentials_FullMethodName = "/gophkeeper.Keeper/CreateCredentials"
-	Keeper_CreateCreditCard_FullMethodName  = "/gophkeeper.Keeper/CreateCreditCard"
-	Keeper_CreateText_FullMethodName        = "/gophkeeper.Keeper/CreateText"
-	Keeper_CreateBinary_FullMethodName      = "/gophkeeper.Keeper/CreateBinary"
-	Keeper_SendData_FullMethodName          = "/gophkeeper.Keeper/SendData"
-	Keeper_ReceiveData_FullMethodName       = "/gophkeeper.Keeper/ReceiveData"
-	Keeper_Ping_FullMethodName              = "/gophkeeper.Keeper/Ping"
+	Keeper_Auth_FullMethodName              = "/gophkeeper.v1.Keeper/Auth"
+	Keeper_Register_FullMethodName          = "/gophkeeper.v1.Keeper/Register"
+	Keeper_GetAll_FullMethodName            = "/gophkeeper.v1.Keeper/GetAll"
+	Keeper_CreateCredentials_FullMethodName = "/gophkeeper.v1.Keeper/CreateCredentials"
+	Keeper_CreateCreditCard_FullMethodName  = "/gophkeeper.v1.Keeper/CreateCreditCard"
+	Keeper_CreateText_FullMethodName        = "/gophkeeper.v1.Keeper/CreateText"
+	Keeper_CreateBinary_FullMethodName      = "/gophkeeper.v1.Keeper/CreateBinary"
+	Keeper_SendData_FullMethodName          = "/gophkeeper.v1.Keeper/SendData"
+	Keeper_ReceiveData_FullMethodName       = "/gophkeeper.v1.Keeper/ReceiveData"
+	Keeper_Ping_FullMethodName              = "/gophkeeper.v1.Keeper/Ping"
 )
 
 // KeeperClient is the client API for Keeper service.
@@ -462,7 +462,7 @@ func _Keeper_Ping_Handler(srv interface{}, ctx context.Context, dec func(interfa
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Keeper_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gophkeeper.Keeper",
+	ServiceName: "gophkeeper.v1.Keeper",
 	HandlerType: (*KeeperServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -510,5 +510,5 @@ var Keeper_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "internal/contract/gophkeeper.proto",
+	Metadata: "pkg/gophkeeper/gophkeeper.proto",
 }

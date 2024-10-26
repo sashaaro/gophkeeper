@@ -1,9 +1,9 @@
-package utils_test
+package entity_test
 
 import (
 	"testing"
 
-	"github.com/sashaaro/gophkeeper/internal/utils"
+	"github.com/sashaaro/gophkeeper/internal/entity"
 )
 
 func TestCheckMoonAlgorithm(t *testing.T) {
@@ -42,7 +42,7 @@ func TestCheckMoonAlgorithm(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			if got := utils.CheckMoonAlgorithm(tt.b); got != tt.want {
+			if got := entity.CheckMoonAlgorithm(tt.b); got != tt.want {
 				t.Errorf("Valid() = %v, want %v", got, tt.want)
 			}
 		})

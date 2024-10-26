@@ -7,7 +7,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/sashaaro/gophkeeper/internal/contract"
+	"github.com/sashaaro/gophkeeper/pkg/gophkeeper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -47,7 +47,7 @@ func NewGRPCServer(addr string, opts ...Opt) *GRPCServer {
 		o(srv)
 	}
 	srv.server = grpc.NewServer()
-	contract.RegisterKeeperServer(srv.server, &KeeperServer{})
+	gophkeeper.RegisterKeeperServer(srv.server, &KeeperServer{})
 	return &srv
 }
 

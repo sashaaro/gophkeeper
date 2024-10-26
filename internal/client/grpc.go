@@ -3,10 +3,11 @@ package client
 import (
 	"context"
 
-	"github.com/sashaaro/gophkeeper/internal/contract"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/sashaaro/gophkeeper/pkg/gophkeeper"
 )
 
 type GRPCClient struct {
@@ -44,8 +45,8 @@ func (c *GRPCClient) Ping(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	a := contract.NewKeeperClient(conn)
-	_, err = a.Ping(ctx, &contract.Empty{})
+	a := gophkeeper.NewKeeperClient(conn)
+	_, err = a.Ping(ctx, &gophkeeper.Empty{})
 	if err != nil {
 		return err
 	}
@@ -65,6 +66,6 @@ func (c *GRPCClient) connect() (grpc.ClientConnInterface, error) {
 	return conn, nil
 }
 
-func (c *GRPCClient) Stop() error {
+func (c *GRPCClient) Close() error {
 	return c.conn.Close()
 }

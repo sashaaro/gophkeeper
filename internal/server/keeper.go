@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/sashaaro/gophkeeper/internal/contract"
 	"github.com/sashaaro/gophkeeper/internal/log"
+	gophkeeper2 "github.com/sashaaro/gophkeeper/pkg/gophkeeper"
 )
 
 type KeeperServer struct {
-	contract.KeeperServer
+	gophkeeper2.KeeperServer
 }
 
 type UserRegisterer interface {
@@ -28,7 +28,7 @@ func NewKeeperServer() *KeeperServer {
 	return &KeeperServer{}
 }
 
-func (s *KeeperServer) Ping(_ context.Context, in *contract.Empty) (*contract.Empty, error) {
+func (s *KeeperServer) Ping(_ context.Context, in *gophkeeper2.Empty) (*gophkeeper2.Empty, error) {
 	log.Info("ping")
 	return in, nil
 }

@@ -1,7 +1,7 @@
 syntax = "proto3";
-package gophkeeper;
+package gophkeeper.v1;
 
-option go_package = "contract/contract";
+option go_package = "keeper/gophkeeper";
 
 message Empty {}
 
@@ -11,10 +11,11 @@ message Credentials {
 }
 
 enum Kind {
-  CREDENTIALS = 0;
-  TEXT = 1;
-  BINARY = 2;
-  CREDIT_CARD = 3;
+  KIND_UNSPECIFIED = 0;
+  KIND_CREDENTIALS = 1;
+  KIND_TEXT = 2;
+  KIND_BINARY = 3;
+  KIND_CREDIT_CARD = 4;
 }
 
 message Metadata {
@@ -80,10 +81,10 @@ message Entity {
 }
 
 message EntityList {
-  repeated Entity Entity = 1;
+  repeated Entity entity = 1;
 }
 
-service Keeper {
+service KeeperService {
   rpc Auth(Credentials) returns(Empty);
   rpc Register(Credentials) returns(Empty);
   rpc GetAll(Empty) returns(EntityList);

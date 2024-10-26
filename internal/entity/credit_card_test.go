@@ -29,9 +29,21 @@ func TestCreditCard_Valid(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "wrong number",
+			name: "wrong number sum",
 			fields: fields{
 				Number: "1234567890123456",
+				Date:   "01/99",
+				Name:   "VASYA A",
+				Code:   "231",
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorContains(t, err, "card number")
+			},
+		},
+		{
+			name: "wrong number record",
+			fields: fields{
+				Number: "1234-5678-9012-3456",
 				Date:   "01/99",
 				Name:   "VASYA A",
 				Code:   "231",

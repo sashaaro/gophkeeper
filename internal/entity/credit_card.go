@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-
-	"github.com/sashaaro/gophkeeper/internal/utils"
 )
 
 type CreditCard struct {
@@ -46,7 +44,7 @@ func (c *CreditCard) validateNumber() error {
 	if !RegexpCardNumber.MatchString(c.Number) {
 		return fmt.Errorf("card number should to contain 16 digits: %w", ErrValidation)
 	}
-	if !utils.CheckMoonAlgorithm(c.Number) {
+	if !CheckMoonAlgorithm(c.Number) {
 		return fmt.Errorf("card number should to cover with Moon Alg: %w", ErrValidation)
 	}
 	return nil
