@@ -10,13 +10,15 @@ import (
 )
 
 type KeeperServer struct {
-	gophkeeper.KeeperServiceServer
-	userSvc *service.UserService
+	gophkeeper.UnimplementedKeeperServiceServer
+	userSvc  *service.UserService
+	vaultSvc *service.VaultService
 }
 
-func NewKeeperServer(userSvc *service.UserService) *KeeperServer {
+func NewKeeperServer(userSvc *service.UserService, vaultSvc *service.VaultService) *KeeperServer {
 	return &KeeperServer{
-		userSvc: userSvc,
+		userSvc:  userSvc,
+		vaultSvc: vaultSvc,
 	}
 }
 
@@ -28,3 +30,7 @@ func (s *KeeperServer) Ping(_ context.Context, in *gophkeeper.Empty) (*gophkeepe
 	log.Info("ping")
 	return in, nil
 }
+
+//	func (s *KeeperServer) CreateCredentials(ctx context.Context, *gophkeeper.CreateCreadentialsReq) (*gophkeeper.Entity, error) {
+//
+//	}

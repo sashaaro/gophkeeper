@@ -9,7 +9,7 @@ import (
 	"github.com/sashaaro/gophkeeper/internal/hasher"
 	"github.com/sashaaro/gophkeeper/internal/log"
 	"github.com/sashaaro/gophkeeper/internal/postgres"
-	service "github.com/sashaaro/gophkeeper/internal/service"
+	"github.com/sashaaro/gophkeeper/internal/service"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 
@@ -40,6 +40,8 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 					passwordHasher := hasher.NewHasher()
 					userRepo := postgres.NewUserRepository(db)
 					userSvc := service.NewUserService(passwordHasher, userRepo)
+					vaultRepo := postgres.NewVaultRepository(db)
+					vaultSvc := service.NewVaultService(vaultRepo)
 					cert, err := cfg.TLS.Certificate()
 					if err != nil {
 						log.Panic("failed to load key pair: %s", log.Err(err))
@@ -48,7 +50,7 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 						server.WithAuth(authService),
 						server.WithTLS(cert),
 					}
-					grpcServer := server.NewGRPCServer(cfg.Listen, userSvc, jwtSvc, opts...)
+					grpcServer := server.NewGRPCServer(cfg.Listen, userSvc, vaultSvc, jwtSvc, opts...)
 					if err := grpcServer.Serve(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 						return err
 					}

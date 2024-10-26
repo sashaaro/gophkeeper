@@ -44,6 +44,7 @@ func WithAuth(authenticator *auth.Authenticator) Opt {
 func NewGRPCServer(
 	addr string,
 	userSvc *service.UserService,
+	vaultSvc *service.VaultService,
 	jwtSvc *service.JwtService,
 	opts ...Opt,
 ) *GRPCServer {
@@ -56,7 +57,7 @@ func NewGRPCServer(
 	}
 	srv.server = grpc.NewServer(srv.opts...)
 	gophkeeper.RegisterAuthServiceServer(srv.server, NewAuthServer(userSvc, jwtSvc))
-	gophkeeper.RegisterKeeperServiceServer(srv.server, NewKeeperServer(userSvc))
+	gophkeeper.RegisterKeeperServiceServer(srv.server, NewKeeperServer(userSvc, vaultSvc))
 	return &srv
 }
 

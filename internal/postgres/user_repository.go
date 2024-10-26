@@ -22,8 +22,11 @@ func NewUserRepository(conn *Conn) *UserRepository {
 }
 
 func (r *UserRepository) Create(ctx context.Context, m *entity.User) error {
+	if m == nil {
+		return ErrModelIsNil
+	}
 	if m.ID == uuid.Nil {
-		return errors.New("User.ID is nil")
+		m.ID = uuid.Must(uuid.NewV6())
 	}
 	log.Info(fmt.Sprintf("%s, %s, %s", m.ID, m.Password, m.Login))
 	_, err := r.db.ExecContext(ctx, `INSERT INTO "user" (id, login, pass) VALUES ($1, $2, $3)`, m.ID, m.Login, m.Password)
@@ -32,7 +35,7 @@ func (r *UserRepository) Create(ctx context.Context, m *entity.User) error {
 
 func (r *UserRepository) Get(ctx context.Context, id uuid.UUID, m *entity.User) error {
 	if m == nil {
-		return errors.New("model should not be nil")
+		return ErrModelIsNil
 	}
 	row := r.db.QueryRowContext(ctx, `SELECT id, login, pass FROM "user" WHERE id = $1`, id)
 	if err := row.Err(); err != nil {
@@ -46,7 +49,7 @@ func (r *UserRepository) Get(ctx context.Context, id uuid.UUID, m *entity.User) 
 
 func (r *UserRepository) GetByLogin(ctx context.Context, login string, m *entity.User) error {
 	if m == nil {
-		return errors.New("model should not be nil")
+		return ErrModelIsNil
 	}
 	row := r.db.QueryRowContext(ctx, `SELECT id, login, pass FROM "user" WHERE login = $1`, login)
 	if err := row.Err(); err != nil {
