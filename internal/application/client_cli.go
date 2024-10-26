@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/sashaaro/gophkeeper/internal/client"
@@ -8,6 +9,10 @@ import (
 	"github.com/sashaaro/gophkeeper/internal/log"
 	"github.com/urfave/cli/v2"
 )
+
+type Pinger interface {
+	Ping(ctx context.Context) error
+}
 
 func NewClientCLI(version string, cfg *config.Client) *cli.App {
 	return &cli.App{

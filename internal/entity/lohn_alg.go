@@ -1,8 +1,8 @@
 package entity
 
-// CheckMoonAlgorithm - вернёт true, если цифры из которых состоит строка удовлетворяют Лунному алгоритму.
+// CheckLohnAlgorithm - вернёт true, если цифры из которых состоит строка удовлетворяют алгоритму Луна.
 // Не цифровые символы игнорируются
-func CheckMoonAlgorithm(b string) bool {
+func CheckLohnAlgorithm(b string) bool {
 	if b == "" {
 		return false
 	}

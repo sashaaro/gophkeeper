@@ -44,7 +44,7 @@ func (c *CreditCard) validateNumber() error {
 	if !RegexpCardNumber.MatchString(c.Number) {
 		return fmt.Errorf("card number should to contain 16 digits: %w", ErrValidation)
 	}
-	if !CheckMoonAlgorithm(c.Number) {
+	if !CheckLohnAlgorithm(c.Number) {
 		return fmt.Errorf("card number should to cover with Moon Alg: %w", ErrValidation)
 	}
 	return nil

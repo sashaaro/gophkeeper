@@ -6,7 +6,7 @@ import (
 	"github.com/sashaaro/gophkeeper/internal/entity"
 )
 
-func TestCheckMoonAlgorithm(t *testing.T) {
+func TestCheckLohnAlgorithm(t *testing.T) {
 	tests := map[string]struct {
 		b    string
 		want bool
@@ -42,7 +42,7 @@ func TestCheckMoonAlgorithm(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			if got := entity.CheckMoonAlgorithm(tt.b); got != tt.want {
+			if got := entity.CheckLohnAlgorithm(tt.b); got != tt.want {
 				t.Errorf("Valid() = %v, want %v", got, tt.want)
 			}
 		})
