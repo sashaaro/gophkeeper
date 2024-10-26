@@ -72,6 +72,15 @@ type JwtService struct {
 	cfg *JwtConfig
 }
 
+type TokenOption func(token *jwt.Token)
+
+func WithExpiration(duration time.Duration) TokenOption {
+	return func(token *jwt.Token) {
+		if claims, ok := token.Claims.(JwtClaims); ok {
+			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(duration))
+		}
+	}
+}
 func NewJwtService(cfg *JwtConfig) (*JwtService, error) {
 	if err := cfg.LoadKeys(); err != nil {
 		return nil, err
@@ -79,11 +88,13 @@ func NewJwtService(cfg *JwtConfig) (*JwtService, error) {
 	return &JwtService{cfg: cfg}, nil
 }
 
-func (s *JwtService) CreateToken(u entity.User, duration time.Duration) (string, error) {
+func (s *JwtService) CreateToken(u entity.User, opts ...TokenOption) (string, error) {
 	claims := JwtClaims{}
 	claims.ID = u.ID.String()
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(duration))
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
+	for _, o := range opts {
+		o(token)
+	}
 	tokenString, err := token.SignedString(s.cfg.PrivateKey)
 	if err != nil {
 		return "", err

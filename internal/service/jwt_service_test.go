@@ -18,7 +18,7 @@ func TestJwtService_CreateToken(t *testing.T) {
 	require.NoError(t, err)
 	uid := uuid.Must(uuid.NewV6())
 	t.Run("Create JWT", func(t *testing.T) {
-		tokenString, err := jwtService.CreateToken(entity.User{ID: uid}, time.Second)
+		tokenString, err := jwtService.CreateToken(entity.User{ID: uid}, service.WithExpiration(time.Second))
 		require.NoError(t, err)
 		got, err := jwtService.ParseToken(tokenString)
 		require.NoError(t, err)

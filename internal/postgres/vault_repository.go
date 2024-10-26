@@ -113,16 +113,20 @@ func (r VaultRepository) Tags(
 	return n, nil
 }
 
+// CreateCredentials - Добавить в хранилище новый секрет типа Credentials.
+// Сущность создавать через entity.NewCredentials()
 func (r VaultRepository) CreateCredentials(ctx context.Context, userID uuid.UUID, m *entity.Credentials) error {
 	if m == nil {
 		return ErrModelIsNil
 	}
+	m.Kind = entity.KindCredentials
+	m.UserID = userID
 	return r.db.InTransaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 		if err := r.insertSecret(ctx, tx, &m.Secret); err != nil {
 			return err
 		}
 		q := `INSERT INTO credentials (id, login, password) VALUES ($1, $2, $3)`
-		_, err := r.db.ExecContext(ctx, q, m.ID, m.Login, m.Password)
+		_, err := tx.ExecContext(ctx, q, m.ID, m.Login, m.Password)
 		return err
 	})
 }

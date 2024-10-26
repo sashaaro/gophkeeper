@@ -2,9 +2,12 @@ package postgres_test
 
 import (
 	"context"
+	"database/sql"
+	"embed"
 	"os"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/sashaaro/gophkeeper/internal/log"
 	"github.com/stretchr/testify/suite"
 
@@ -28,6 +31,7 @@ func (s *PostgresSuite) SetupTest() {
 	_, err = db.ExecContext(context.Background(), `TRUNCATE TABLE "user" CASCADE`)
 	s.Require().NoError(err)
 	s.conn = db
+	s.Require().NoError(db.InTransaction(context.Background(), loadFixtures))
 }
 
 func (s *PostgresSuite) TearDownTest() {
@@ -40,4 +44,20 @@ func TestDBStorage(t *testing.T) {
 
 func (s *PostgresSuite) TestPing() {
 	s.Require().NoError(s.conn.Ping(context.Background()))
+}
+
+var TestUserID = uuid.Must(uuid.Parse("01ef6697-3190-6984-9572-74563c32efde"))
+var TestUserLogin = "test"
+var TestUserHash = "123"
+
+//go:embed fixtures_test.sql
+var fixtures embed.FS
+
+func loadFixtures(ctx context.Context, tx *sql.Tx) (err error) {
+	q, err := fixtures.ReadFile("fixtures_test.sql")
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, string(q))
+	return err
 }

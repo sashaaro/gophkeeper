@@ -37,7 +37,7 @@ func (s *AuthServer) Login(ctx context.Context, in *gophkeeper.Credentials) (*go
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
-	t, err := s.jwtSvc.CreateToken(*u, time.Hour)
+	t, err := s.jwtSvc.CreateToken(*u, service.WithExpiration(time.Hour))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -49,7 +49,7 @@ func (s *AuthServer) Register(ctx context.Context, in *gophkeeper.Credentials) (
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	t, err := s.jwtSvc.CreateToken(*u, time.Hour)
+	t, err := s.jwtSvc.CreateToken(*u, service.WithExpiration(time.Hour))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}

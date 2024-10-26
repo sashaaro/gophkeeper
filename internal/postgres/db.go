@@ -7,7 +7,6 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/sashaaro/gophkeeper/internal/log"
 )
 
 var (
@@ -37,9 +36,9 @@ func NewConn(dsn string) (conn *Conn, err error) {
 		return nil, ErrDBConnection
 	}
 	conn = &Conn{db: db}
-	err = conn.InTransaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
-		return CreateTablesIfNotExist(ctx, tx)
-	})
+	if err := RunMigrations(ctx, db); err != nil {
+		return nil, err
+	}
 	return conn, nil
 }
 
@@ -73,76 +72,6 @@ func (c *Conn) QueryContext(ctx context.Context, query string, args ...any) (*sq
 
 func (c *Conn) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
 	return c.db.QueryRowContext(ctx, query, args...)
-}
-
-const (
-	sqlCreateTableUser = `CREATE TABLE IF NOT EXISTS "user" (
-		id uuid not null primary key,
-		login varchar(255) not null unique,
-		pass varchar(255) not null
-	)`
-	//nolint - this is not harcoded credentials
-	sqlCreateEnumSecretKind = `
-		DO $$
-		BEGIN
-			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'secret_kind') THEN
-				CREATE TYPE secret_kind AS ENUM
-				(
-					'credentials',
-					'credit_card',
-					'text',
-					'binary'
-				);
-			END IF;
-		END$$; 
-		`
-	sqlCreateTableSecret = `CREATE TABLE IF NOT EXISTS "secret" (
-	    id uuid not null primary key,
-	    user_id uuid not null REFERENCES "user" (id) ON DELETE CASCADE,
-	    name varchar(255) not null,
-	    kind secret_kind not null,
-	    unique (user_id, name)
-    )`
-	sqlCreateTableTag = `CREATE TABLE IF NOT EXISTS "tag" (
-    	id uuid not null primary key,
-    	secret_id uuid not null REFERENCES secret (id) ON DELETE CASCADE,
-    	name varchar(255) not null,
-    	value text not null
-    )`
-	sqlCreateTableCredentials = `CREATE TABLE IF NOT EXISTS "credentials" (
-    	id uuid not null primary key REFERENCES secret (id) ON DELETE CASCADE,
-    	login varchar(255) not null,
-    	password varchar(255) not null
-    )`
-	sqlCreateTableCreditCard = `CREATE TABLE IF NOT EXISTS "credit_card" (
-    	id uuid not null primary key REFERENCES secret (id) ON DELETE CASCADE,
-    	date char(5) not null,
-    	name varchar(255) not null,
-    	code char(3) not null
-    )`
-	sqlCreateTableBinary = `CREATE TABLE IF NOT EXISTS "binary_data" (
-    	id uuid not null primary key REFERENCES secret (id) ON DELETE CASCADE,
-    	is_uploaded bool not null default false
-    )`
-)
-
-func CreateTablesIfNotExist(ctx context.Context, tx *sql.Tx) (err error) {
-	log.Info("Initialize database")
-	migrations := []string{
-		sqlCreateTableUser,
-		sqlCreateEnumSecretKind,
-		sqlCreateTableSecret,
-		sqlCreateTableTag,
-		sqlCreateTableCredentials,
-		sqlCreateTableCreditCard,
-		sqlCreateTableBinary,
-	}
-	for _, q := range migrations {
-		if _, err := tx.ExecContext(ctx, q); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (d *Conn) Ping(ctx context.Context) error {
