@@ -5,30 +5,26 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sashaaro/gophkeeper/internal/log"
-	gophkeeper2 "github.com/sashaaro/gophkeeper/pkg/gophkeeper"
+	"github.com/sashaaro/gophkeeper/internal/service"
+	"github.com/sashaaro/gophkeeper/pkg/gophkeeper"
 )
 
 type KeeperServer struct {
-	gophkeeper2.KeeperServer
+	gophkeeper.KeeperServiceServer
+	userSvc *service.UserService
 }
 
-type UserRegisterer interface {
-	Register(login, password string) uuid.UUID
-}
-
-type UserLoginer interface {
-	Login(login, password string) uuid.NullUUID
+func NewKeeperServer(userSvc *service.UserService) *KeeperServer {
+	return &KeeperServer{
+		userSvc: userSvc,
+	}
 }
 
 type CredentialsSaver interface {
 	SaveCredentials(userID uuid.UUID)
 }
 
-func NewKeeperServer() *KeeperServer {
-	return &KeeperServer{}
-}
-
-func (s *KeeperServer) Ping(_ context.Context, in *gophkeeper2.Empty) (*gophkeeper2.Empty, error) {
+func (s *KeeperServer) Ping(_ context.Context, in *gophkeeper.Empty) (*gophkeeper.Empty, error) {
 	log.Info("ping")
 	return in, nil
 }

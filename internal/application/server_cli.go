@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sashaaro/gophkeeper/internal/auth"
 	"github.com/sashaaro/gophkeeper/internal/entity"
 	"github.com/sashaaro/gophkeeper/internal/hasher"
 	"github.com/sashaaro/gophkeeper/internal/log"
 	"github.com/sashaaro/gophkeeper/internal/postgres"
-	user2 "github.com/sashaaro/gophkeeper/internal/service"
+	service "github.com/sashaaro/gophkeeper/internal/service"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 
@@ -25,7 +26,20 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 			{
 				Name: "serve",
 				Action: func(context *cli.Context) error {
-					grpcServer := server.NewGRPCServer(cfg.Listen)
+					jwtSvc, err := service.NewJwtService(cfg.JWT)
+					if err != nil {
+						return err
+					}
+					authService := auth.NewAuthenticator(jwtSvc)
+					db, err := postgres.NewConn(`postgres://postgres:postgres@127.0.0.1:5432/keeper`)
+					if err != nil {
+						log.Error("create user. fail connect db", log.Err(err))
+						return err
+					}
+					passwordHasher := hasher.NewHasher()
+					userRepo := postgres.NewUserRepository(db)
+					userSvc := service.NewUserService(passwordHasher, userRepo)
+					grpcServer := server.NewGRPCServer(cfg.Listen, userSvc, jwtSvc, server.WithAuth(authService), server.WithoutTLS())
 					if err := grpcServer.Serve(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 						return err
 					}
@@ -42,9 +56,9 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 						log.Error("create user. fail connect db", log.Err(err))
 						return err
 					}
-					passwordHasher := hasher.NewHasher(`marabumba`)
+					passwordHasher := hasher.NewHasher()
 					userRepo := postgres.NewUserRepository(db)
-					userService := user2.NewUserService(passwordHasher, userRepo)
+					userService := service.NewUserService(passwordHasher, userRepo)
 					var user *entity.User
 					if user, err = userService.Create(ctx.Context, login, password); err != nil {
 						log.Error("fail create user", log.Err(err))

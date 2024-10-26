@@ -12,7 +12,8 @@ import (
 
 //go:generate mockgen -source ./user_service.go -destination ./mocks/user_service.go -package mocks
 type PasswordHasher interface {
-	Hash(pwd string) string
+	Hash(pwd string) (string, error)
+	IsEqual(hashed, check string) error
 }
 
 type UserCreator interface {
@@ -53,7 +54,7 @@ func (s *UserService) Login(ctx context.Context, login, password string) (*entit
 	if u == nil {
 		return nil, fmt.Errorf("login not exists: %w", ErrWrongCredentials)
 	}
-	if s.hasher.Hash(password) != u.Password {
+	if err := s.hasher.IsEqual(u.Password, password); err != nil {
 		return nil, fmt.Errorf("password mismatch: %w", ErrWrongCredentials)
 	}
 	return u, nil
@@ -66,9 +67,13 @@ func (s *UserService) Get(ctx context.Context, id uuid.UUID, m *entity.User) err
 
 // Create - создать юзера. У модели entity.User генерится новый ID и она сохраняется в репозитории
 func (s *UserService) Create(ctx context.Context, login, password string) (_ *entity.User, err error) {
+	passHash, err := s.hasher.Hash(password)
+	if err != nil {
+		return nil, err
+	}
 	m := entity.User{
 		Login:    login,
-		Password: s.hasher.Hash(password),
+		Password: passHash,
 	}
 	if m.ID, err = uuid.NewV6(); err != nil {
 		return nil, err

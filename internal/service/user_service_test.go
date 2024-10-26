@@ -87,7 +87,7 @@ func TestUserService_Create(t *testing.T) {
 			defer ctrl.Finish()
 
 			hasherMock := mocks.NewMockPasswordHasher(ctrl)
-			hasherMock.EXPECT().Hash(gomock.Any()).Return(tt.expectedHasherRes.res)
+			hasherMock.EXPECT().Hash(gomock.Any()).Return(tt.expectedHasherRes.res, nil)
 
 			repoMock := mocks.NewMockUserRepository(ctrl)
 			repoMock.EXPECT().Create(gomock.Any(), gomock.Any()).AnyTimes().Return(tt.expectedRepoRes)

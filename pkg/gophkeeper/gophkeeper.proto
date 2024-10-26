@@ -84,9 +84,16 @@ message EntityList {
   repeated Entity entity = 1;
 }
 
+message AuthToken {
+  string jwt = 1;
+}
+
+service AuthService {
+  rpc Login(Credentials) returns(AuthToken);
+  rpc Register(Credentials) returns(AuthToken);
+}
+
 service KeeperService {
-  rpc Auth(Credentials) returns(Empty);
-  rpc Register(Credentials) returns(Empty);
   rpc GetAll(Empty) returns(EntityList);
   rpc CreateCredentials(CreateCreadentialsReq) returns(Entity);
   rpc CreateCreditCard(CreateCreditCardReq) returns(Entity);

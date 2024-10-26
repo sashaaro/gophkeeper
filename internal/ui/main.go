@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"github.com/sashaaro/gophkeeper/internal/client"
 )
 
 const (
@@ -13,21 +14,22 @@ const (
 )
 
 type UIApp struct {
-	app   *tview.Application
-	pages *tview.Pages
+	app    *tview.Application
+	client *client.Client
+	pages  *tview.Pages
 }
 
-func NewUIApp() *UIApp {
+type Registerer interface {
+}
+
+func NewUIApp(client *client.Client) *UIApp {
 	app := tview.NewApplication()
 	pages := tview.NewPages()
 	return &UIApp{
-		app:   app.SetRoot(pages, true).EnableMouse(true),
-		pages: pages,
+		app:    app.SetRoot(pages, true).EnableMouse(true),
+		client: client,
+		pages:  pages,
 	}
-}
-
-func (a *UIApp) Run() error {
-	return a.app.Run()
 }
 
 func (a *UIApp) Init() {
@@ -51,4 +53,8 @@ func (a *UIApp) Init() {
 		}
 		return event
 	})
+}
+
+func (a *UIApp) Run() error {
+	return a.app.Run()
 }

@@ -1,53 +1,62 @@
 package server
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
-	"strings"
 
+	"github.com/sashaaro/gophkeeper/internal/auth"
+	"github.com/sashaaro/gophkeeper/internal/log"
+	"github.com/sashaaro/gophkeeper/internal/service"
 	"github.com/sashaaro/gophkeeper/pkg/gophkeeper"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
-
-	"github.com/sashaaro/gophkeeper/internal/log"
-)
-
-var (
-	errMissingMetadata = status.Errorf(codes.InvalidArgument, "missing metadata")
-	errInvalidToken    = status.Errorf(codes.Unauthenticated, "invalid token")
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type GRPCServer struct {
 	opts   []grpc.ServerOption
 	server *grpc.Server
 	addr   string
+	auth   auth.Authenticator
 }
 
-type Opt func(GRPCServer)
+type Opt func(*GRPCServer)
 
-func WithTLS(certificate *tls.Certificate) func(*GRPCServer) {
+func WithTLS(certificate *tls.Certificate) Opt {
 	return func(s *GRPCServer) {
 		s.opts = append(s.opts, grpc.Creds(credentials.NewServerTLSFromCert(certificate)))
 	}
 }
 
-func NewGRPCServer(addr string, opts ...Opt) *GRPCServer {
+func WithoutTLS() Opt {
+	return func(s *GRPCServer) {
+		s.opts = append(s.opts, grpc.Creds(insecure.NewCredentials()))
+	}
+}
+
+func WithAuth(authenticator *auth.Authenticator) Opt {
+	return func(s *GRPCServer) {
+		s.opts = append(s.opts, grpc.UnaryInterceptor(authenticator.AuthorizeInterceptor()))
+	}
+}
+
+func NewGRPCServer(
+	addr string,
+	userSvc *service.UserService,
+	jwtSvc *service.JwtService,
+	opts ...Opt,
+) *GRPCServer {
 	srv := GRPCServer{
-		opts: []grpc.ServerOption{
-			grpc.UnaryInterceptor(ensureValidToken),
-		},
+		opts: []grpc.ServerOption{},
 		addr: addr,
 	}
 	for _, o := range opts {
-		o(srv)
+		o(&srv)
 	}
-	srv.server = grpc.NewServer()
-	gophkeeper.RegisterKeeperServer(srv.server, &KeeperServer{})
+	srv.server = grpc.NewServer(srv.opts...)
+	gophkeeper.RegisterAuthServiceServer(srv.server, NewAuthServer(userSvc, jwtSvc))
+	gophkeeper.RegisterKeeperServiceServer(srv.server, NewKeeperServer(userSvc))
 	return &srv
 }
 
@@ -63,30 +72,4 @@ func (s *GRPCServer) Serve() error {
 
 func (s *GRPCServer) Shutdown() {
 	s.server.GracefulStop()
-}
-
-// valid validates the authorization.
-func valid(authorization []string) bool {
-	if len(authorization) < 1 {
-		return false
-	}
-	token := strings.TrimPrefix(authorization[0], "Bearer ")
-	// Perform the token validation here. For the sake of this example, the code
-	// here forgoes any of the usual OAuth2 token validation and instead checks
-	// for a token matching an arbitrary string.
-	return token == "some-secret-token"
-}
-
-func ensureValidToken(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, errMissingMetadata
-	}
-	// The keys within metadata.MD are normalized to lowercase.
-	// See: https://godoc.org/google.golang.org/grpc/metadata#New
-	if !valid(md["authorization"]) {
-		return nil, errInvalidToken
-	}
-	// Continue execution of handler after ensuring a valid token.
-	return handler(ctx, req)
 }

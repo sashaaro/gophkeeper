@@ -11,9 +11,11 @@ import (
 )
 
 type GRPCClient struct {
-	serverAddr string
-	dialOpts   []grpc.DialOption
-	conn       *grpc.ClientConn
+	serverAddr    string
+	dialOpts      []grpc.DialOption
+	conn          *grpc.ClientConn
+	_keeperClient gophkeeper.KeeperServiceClient
+	_authClient   gophkeeper.AuthServiceClient
 }
 
 type Opt func(*GRPCClient)
@@ -41,16 +43,52 @@ func WithoutTLS() Opt {
 }
 
 func (c *GRPCClient) Ping(ctx context.Context) error {
-	conn, err := c.connect()
+	a, err := c.keeperClient()
 	if err != nil {
 		return err
 	}
-	a := gophkeeper.NewKeeperClient(conn)
 	_, err = a.Ping(ctx, &gophkeeper.Empty{})
+	return err
+}
+
+func (c *GRPCClient) Register(ctx context.Context, login, password string) error {
+	a, err := c.authClient()
 	if err != nil {
 		return err
 	}
-	return nil
+	_, err = a.Register(ctx, &gophkeeper.Credentials{Login: login, Password: password})
+	return err
+}
+
+func (c *GRPCClient) Login(ctx context.Context, login, password string) error {
+	a, err := c.authClient()
+	if err != nil {
+		return err
+	}
+	_, err = a.Login(ctx, &gophkeeper.Credentials{Login: login, Password: password})
+	return err
+}
+
+func (c *GRPCClient) keeperClient() (gophkeeper.KeeperServiceClient, error) {
+	if c._keeperClient == nil {
+		conn, err := c.connect()
+		if err != nil {
+			return nil, err
+		}
+		c._keeperClient = gophkeeper.NewKeeperServiceClient(conn)
+	}
+	return c._keeperClient, nil
+}
+
+func (c *GRPCClient) authClient() (gophkeeper.AuthServiceClient, error) {
+	if c._authClient == nil {
+		conn, err := c.connect()
+		if err != nil {
+			return nil, err
+		}
+		c._authClient = gophkeeper.NewAuthServiceClient(conn)
+	}
+	return c._authClient, nil
 }
 
 func (c *GRPCClient) connect() (grpc.ClientConnInterface, error) {

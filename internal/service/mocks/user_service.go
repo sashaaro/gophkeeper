@@ -37,17 +37,32 @@ func (m *MockPasswordHasher) EXPECT() *MockPasswordHasherMockRecorder {
 }
 
 // Hash mocks base method.
-func (m *MockPasswordHasher) Hash(pwd string) string {
+func (m *MockPasswordHasher) Hash(pwd string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Hash", pwd)
 	ret0, _ := ret[0].(string)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Hash indicates an expected call of Hash.
 func (mr *MockPasswordHasherMockRecorder) Hash(pwd interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Hash", reflect.TypeOf((*MockPasswordHasher)(nil).Hash), pwd)
+}
+
+// IsEqual mocks base method.
+func (m *MockPasswordHasher) IsEqual(hashed, check string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsEqual", hashed, check)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IsEqual indicates an expected call of IsEqual.
+func (mr *MockPasswordHasherMockRecorder) IsEqual(hashed, check interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsEqual", reflect.TypeOf((*MockPasswordHasher)(nil).IsEqual), hashed, check)
 }
 
 // MockUserCreator is a mock of UserCreator interface.

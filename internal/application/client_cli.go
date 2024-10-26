@@ -7,7 +7,7 @@ import (
 	"github.com/sashaaro/gophkeeper/internal/client"
 	"github.com/sashaaro/gophkeeper/internal/config"
 	"github.com/sashaaro/gophkeeper/internal/log"
-	ui2 "github.com/sashaaro/gophkeeper/internal/ui"
+	"github.com/sashaaro/gophkeeper/internal/ui"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,9 +25,9 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 			{
 				Name: "ui",
 				Action: func(c *cli.Context) error {
-					ui := ui2.NewUIApp()
-					ui.Init()
-					return ui.Run()
+					uiApp := ui.NewUIApp(client.NewClient(cfg))
+					uiApp.Init()
+					return uiApp.Run()
 				},
 			},
 			{
@@ -44,17 +44,12 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 				Name:      "register",
 				ArgsUsage: "{login} {password}", // @fixme Небезопасно оставлять пароль в истории cli
 				Action: func(ctx *cli.Context) error {
-					//	login := ctx.Args().Get(0)
-					//	password := ctx.Args().Get(1)
-					//	user := entity.User{
-					//		Login:    login,
-					//		Password: password,
-					//	}
-
-					if err := grpcClient.Ping(ctx.Context); err != nil {
-						fmt.Printf("Fails. %v\n", err)
+					login := ctx.Args().Get(0)
+					password := ctx.Args().Get(1)
+					if err := grpcClient.Register(ctx.Context, login, password); err != nil {
+						return err
 					}
-					fmt.Println("PONG")
+					log.Info("Registered")
 					return nil
 				},
 			},
