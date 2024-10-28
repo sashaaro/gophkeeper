@@ -94,13 +94,17 @@ service AuthService {
   rpc Register(Credentials) returns(AuthToken);
 }
 
+message SendDataResponse {
+
+}
+
 service KeeperService {
   rpc GetAll(Empty) returns(EntityList);
   rpc CreateCredentials(CreateCreadentialsReq) returns(Entity);
   rpc CreateCreditCard(CreateCreditCardReq) returns(Entity);
   rpc CreateText(CreateTextReq) returns(Entity);
   rpc CreateBinary(CreateBinaryReq) returns(Entity);
-  rpc SendData(stream Chunk) returns(Empty);
+  rpc SendData(stream Chunk) returns(SendDataResponse);
   rpc ReceiveData(Entity) returns(stream Chunk);
   rpc Ping(Empty) returns(Empty);
 }

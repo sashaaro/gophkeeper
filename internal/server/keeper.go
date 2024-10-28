@@ -30,7 +30,3 @@ func (s *KeeperServer) Ping(_ context.Context, in *gophkeeper.Empty) (*gophkeepe
 	log.Info("ping")
 	return in, nil
 }
-
-//	func (s *KeeperServer) CreateCredentials(ctx context.Context, *gophkeeper.CreateCreadentialsReq) (*gophkeeper.Entity, error) {
-//
-//	}

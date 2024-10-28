@@ -19,7 +19,6 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 	return &cli.App{
 		Name:    "GophKeeper client",
 		Version: version,
-		Usage:   "say a greeting",
 		Commands: []*cli.Command{
 			{
 				Name: "ui",
@@ -37,7 +36,7 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 					cl := client.NewClient(cfg)
 					defer cl.Close()
 					if err := cl.Ping(ctx.Context); err != nil {
-						fmt.Printf("Fails. %v\n", err)
+						log.Fatal("Pong fails", log.Err(err))
 					}
 					fmt.Println("PONG")
 					return nil
