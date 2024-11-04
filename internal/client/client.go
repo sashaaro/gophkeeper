@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-
 	"github.com/sashaaro/gophkeeper/internal/config"
 	"github.com/sashaaro/gophkeeper/internal/log"
 )
@@ -17,12 +16,17 @@ type Client struct {
 func NewClient(
 	cfg *config.Client,
 ) *Client {
-	creds, err := cfg.TLS.Certificate()
-	if err != nil {
-		log.Panic("Fail to load TLS", log.Err(err))
+	opts := WithoutTLS()
+	if cfg.TLS != nil {
+		creds, err := cfg.TLS.Certificate()
+		if err != nil {
+			log.Panic("Fail to load TLS", log.Err(err))
+		}
+		opts = WithTLS(creds)
 	}
+
 	return &Client{
-		g: NewGRPCClient(cfg.ServerAddr, WithTLS(creds)),
+		g: NewGRPCClient(cfg.ServerAddr, opts),
 	}
 }
 

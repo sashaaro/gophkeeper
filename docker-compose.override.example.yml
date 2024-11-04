@@ -1,5 +1,0 @@
-# Переименовать этот файл в docker-compose.override.yml, если хочется кастомизировать docker-compose.yml
-services:
-  postgres:
-    ports:
-      - 5432:5432

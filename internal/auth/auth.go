@@ -42,7 +42,7 @@ func (a *Authenticator) ensureValidToken(ctx context.Context, req any, _ *grpc.U
 		return nil, ErrMissingMetadata
 	}
 	log.Info("Call grpc method", log.Str("mn", mn))
-	if strings.Index(mn, "/gophkeeper.v1.AuthService/") == 0 {
+	if strings.HasPrefix(mn, "/gophkeeper.v1.AuthService/") || strings.HasPrefix(mn, "/gophkeeper.v1.KeeperService/Ping") {
 		// Пропускаем аутентификацию для сервиса авторизации. В будущем надо заменить на grpc.authz с RBAC
 		// Некогда разбираться, сроки горят
 		return handler(ctx, req)

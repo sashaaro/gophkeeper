@@ -46,9 +46,12 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 					if err != nil {
 						log.Panic("failed to load key pair: %s", log.Err(err))
 					}
+
 					opts := []server.Opt{
 						server.WithAuth(authService),
-						server.WithTLS(cert),
+					}
+					if cert != nil {
+						opts = append(opts, server.WithTLS(cert))
 					}
 					grpcServer := server.NewGRPCServer(cfg.Listen, userSvc, vaultSvc, jwtSvc, opts...)
 					if err := grpcServer.Serve(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {

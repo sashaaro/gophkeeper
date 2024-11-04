@@ -6,14 +6,17 @@ const DefaultServerAddress = "127.0.0.1:9876"
 
 type Client struct {
 	ServerAddr string
-	TLS        ssl.ClientConfig
+	TLS        *ssl.ClientConfig
 }
 
 func NewClient() *Client {
-	return &Client{
+	tls := getEnv("TLS_PUBLIC_KEY_PATH", "")
+	client := &Client{
 		ServerAddr: getEnv("SERVER_ADDR", DefaultServerAddress),
-		TLS: ssl.ClientConfig{
-			PublicKeyPath: getEnv("TLS_PUBLIC_KEY_PATH", ""),
-		},
 	}
+	if tls != "" {
+		client.TLS = &ssl.ClientConfig{PublicKeyPath: tls}
+	}
+
+	return client
 }
