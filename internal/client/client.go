@@ -59,7 +59,7 @@ func (c *Client) Login(ctx context.Context, login, password string) error {
 
 func (c *Client) Logout() {
 	c.LoginName = ""
-	c.g.ReInitWithAuth("")
+	_ = c.g.ReInitWithAuth("")
 }
 
 func (c *Client) Ping(ctx context.Context) error {

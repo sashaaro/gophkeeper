@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	PageLoginForm            = "login_form"
-	PageRegisterForm         = "register_form"
-	PageTextSecretForm       = "text_secret_form"
-	PageCreditCardSecretForm = "credit_card_secret_form"
-	PageWidgetMainMenu       = "main_menu"
+	PageLoginForm      = "login_form"
+	PageRegisterForm   = "register_form"
+	PageTextForm       = "text_form"
+	PageCardForm       = "card_form"
+	PageWidgetMainMenu = "main_menu"
 )
 
 type UIApp struct {
@@ -100,6 +100,80 @@ func (a *UIApp) Init() {
 		true,
 	)
 
+	textSecretForm := createTextForm(a, widgetStatus, widgetMainMenu)
+
+	a.pages.AddPage(
+		PageTextForm,
+		tview.NewFlex().
+			SetDirection(tview.FlexRow).
+			AddItem(textSecretForm, 10, 1, true).
+			AddItem(widgetStatus.primitive, 10, 1, true),
+		true,
+		true,
+	)
+
+	creditCardForm := createCardForm(a, widgetStatus, widgetMainMenu)
+
+	a.pages.AddPage(
+		PageCardForm,
+		tview.NewFlex().
+			SetDirection(tview.FlexRow).
+			AddItem(creditCardForm, 10, 1, true).
+			AddItem(widgetStatus.primitive, 10, 1, true),
+		true,
+		true,
+	)
+
+	widgetMainMenu.primitive.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Rune() {
+		case 'q', 'Q':
+			a.app.Stop()
+		case 't', 'T':
+			if a.client.LoginName != "" {
+				resetTextFrom(textSecretForm)
+				a.pages.SwitchToPage(PageTextForm)
+				a.app.ForceDraw()
+			}
+		case 'c', 'C':
+			if a.client.LoginName != "" {
+				resetTextFrom(creditCardForm)
+				a.pages.SwitchToPage(PageCardForm)
+				a.app.ForceDraw()
+			}
+		case 'r', 'R':
+			if a.client.LoginName == "" {
+				widgetRegister.Reset()
+				a.pages.SwitchToPage(PageRegisterForm)
+				a.app.ForceDraw()
+			}
+		case 'l', 'L':
+			if a.client.LoginName == "" {
+				widgetLogin.Reset()
+				a.pages.SwitchToPage(PageLoginForm)
+			}
+		case 'e', 'E':
+			if a.client.LoginName != "" {
+				a.client.Logout()
+				widgetMainMenu.UpdateMenu(BuildGuestMenu())
+				widgetStatus.Log("Log out")
+				widgetMainMenu.SetList(nil)
+				a.app.ForceDraw()
+			}
+		case 'p', 'P':
+			if err := a.client.Ping(context.Background()); err != nil {
+				widgetStatus.Log("ping fails: " + err.Error())
+			} else {
+				widgetStatus.Log("pong")
+			}
+			a.app.ForceDraw()
+		}
+		return event
+	})
+
+	a.pages.SwitchToPage(PageWidgetMainMenu)
+}
+
+func createTextForm(a *UIApp, widgetStatus *WidgetStatus, widgetMainMenu *WidgetMainMenu) *tview.Form {
 	textSecret := struct {
 		Name  string
 		Value string
@@ -123,17 +197,10 @@ func (a *UIApp) Init() {
 			}
 			a.app.ForceDraw()
 		})
+	return textSecretForm
+}
 
-	a.pages.AddPage(
-		PageTextSecretForm,
-		tview.NewFlex().
-			SetDirection(tview.FlexRow).
-			AddItem(textSecretForm, 10, 1, true).
-			AddItem(widgetStatus.primitive, 10, 1, true),
-		true,
-		true,
-	)
-
+func createCardForm(a *UIApp, widgetStatus *WidgetStatus, widgetMainMenu *WidgetMainMenu) *tview.Form {
 	creditCard := entity.CreditCard{
 		Number: "",
 		Date:   "",
@@ -170,71 +237,15 @@ func (a *UIApp) Init() {
 			}
 			a.app.ForceDraw()
 		})
-
-	a.pages.AddPage(
-		PageCreditCardSecretForm,
-		tview.NewFlex().
-			SetDirection(tview.FlexRow).
-			AddItem(creditCardForm, 10, 1, true).
-			AddItem(widgetStatus.primitive, 10, 1, true),
-		true,
-		true,
-	)
-
-	widgetMainMenu.primitive.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Rune() {
-		case 'q', 'Q':
-			a.app.Stop()
-		case 't', 'T':
-			if a.client.LoginName != "" {
-				a.pages.SwitchToPage(PageTextSecretForm)
-				a.app.ForceDraw()
-			}
-		case 'c', 'C':
-			if a.client.LoginName != "" {
-				a.pages.SwitchToPage(PageCreditCardSecretForm)
-				a.app.ForceDraw()
-			}
-		case 'r', 'R':
-			if a.client.LoginName == "" {
-				widgetRegister.Reset()
-				a.pages.SwitchToPage(PageRegisterForm)
-				a.app.ForceDraw()
-			}
-		case 'l', 'L':
-			if a.client.LoginName == "" {
-				widgetLogin.Reset()
-				a.pages.SwitchToPage(PageLoginForm)
-			}
-		case 'e', 'E':
-			if a.client.LoginName != "" {
-				a.client.Logout()
-				widgetMainMenu.UpdateMenu(BuildGuestMenu())
-				widgetStatus.Log("Log out")
-				widgetMainMenu.SetList(nil)
-				a.app.ForceDraw()
-			}
-		case 'p', 'P':
-			if err := a.client.Ping(context.Background()); err != nil {
-				widgetStatus.Log("ping fails: " + err.Error())
-			} else {
-				widgetStatus.Log("pong")
-			}
-			a.app.ForceDraw()
-		}
-		return event
-	})
-
-	a.pages.SwitchToPage(PageWidgetMainMenu)
+	return creditCardForm
 }
 
 func (a *UIApp) Run() error {
 	return a.app.Run()
 }
 
-func Must[T any](t T, err error) T {
-	if err != nil {
-		panic(err)
+func resetTextFrom(f *tview.Form) {
+	for i := 0; i < f.GetFormItemCount(); i++ {
+		f.GetFormItem(i).(*tview.InputField).SetText("")
 	}
-	return t
 }
