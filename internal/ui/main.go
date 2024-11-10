@@ -124,7 +124,23 @@ func (a *UIApp) Init() {
 		true,
 	)
 
-	widgetMainMenu.primitive.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+	callback := inputCaptureCallback(a, textSecretForm, creditCardForm, widgetRegister,
+		widgetLogin, widgetMainMenu, widgetStatus)
+	widgetMainMenu.primitive.SetInputCapture(callback)
+
+	a.pages.SwitchToPage(PageWidgetMainMenu)
+}
+
+func inputCaptureCallback(
+	a *UIApp,
+	textSecretForm *tview.Form,
+	creditCardForm *tview.Form,
+	widgetRegister *WidgetRegisterForm,
+	widgetLogin *WidgetLoginForm,
+	widgetMainMenu *WidgetMainMenu,
+	widgetStatus *WidgetStatus,
+) func(event *tcell.EventKey) *tcell.EventKey {
+	return func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Rune() {
 		case 'q', 'Q':
 			a.app.Stop()
@@ -168,9 +184,7 @@ func (a *UIApp) Init() {
 			a.app.ForceDraw()
 		}
 		return event
-	})
-
-	a.pages.SwitchToPage(PageWidgetMainMenu)
+	}
 }
 
 func createTextForm(a *UIApp, widgetStatus *WidgetStatus, widgetMainMenu *WidgetMainMenu) *tview.Form {
