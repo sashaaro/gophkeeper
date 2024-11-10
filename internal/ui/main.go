@@ -5,14 +5,15 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/sashaaro/gophkeeper/internal/client"
+	"github.com/sashaaro/gophkeeper/internal/entity"
 )
 
 const (
-	PageLoginForm        = "login_form"
-	PageRegisterForm     = "register_form"
-	PageSaveSecret       = "save_secret"
-	PageWidgetMainMenu   = "main_menu"
-	PageWidgetSecretList = "secret_list"
+	PageLoginForm            = "login_form"
+	PageRegisterForm         = "register_form"
+	PageTextSecretForm       = "text_secret_form"
+	PageCreditCardSecretForm = "credit_card_secret_form"
+	PageWidgetMainMenu       = "main_menu"
 )
 
 type UIApp struct {
@@ -99,20 +100,20 @@ func (a *UIApp) Init() {
 		true,
 	)
 
-	secret := struct {
+	textSecret := struct {
 		Name  string
 		Value string
 	}{}
-	saveSecretForm := tview.NewForm()
-	saveSecretForm.
+	textSecretForm := tview.NewForm()
+	textSecretForm.
 		AddInputField("secret name", "", 20, nil, func(text string) {
-			secret.Name = text
+			textSecret.Name = text
 		}).
-		AddInputField("secret value", "", 20, nil, func(text string) {
-			secret.Value = text
+		AddInputField("secret text", "", 20, nil, func(text string) {
+			textSecret.Value = text
 		}).
-		AddButton("Save secret data", func() {
-			err := a.client.SendSecretText(secret.Name, secret.Value)
+		AddButton("Save text secret", func() {
+			err := a.client.SendSecretText(textSecret.Name, textSecret.Value)
 			if err != nil {
 				widgetStatus.Log("error saving secret: " + err.Error())
 			} else {
@@ -124,10 +125,57 @@ func (a *UIApp) Init() {
 		})
 
 	a.pages.AddPage(
-		PageSaveSecret,
+		PageTextSecretForm,
 		tview.NewFlex().
 			SetDirection(tview.FlexRow).
-			AddItem(saveSecretForm, 10, 1, true).
+			AddItem(textSecretForm, 10, 1, true).
+			AddItem(widgetStatus.primitive, 10, 1, true),
+		true,
+		true,
+	)
+
+	creditCard := entity.CreditCard{
+		Number: "",
+		Date:   "",
+		Name:   "",
+		Code:   "",
+	}
+	creditCardForm := tview.NewForm()
+
+	var secretName string
+	creditCardForm.
+		AddInputField("secret name", "", 20, nil, func(text string) {
+			secretName = text
+		}).
+		AddInputField("credit cart number", "", 20, nil, func(text string) {
+			creditCard.Number = text
+		}).
+		AddInputField("date", "", 20, nil, func(text string) {
+			creditCard.Date = text
+		}).
+		AddInputField("name", "", 20, nil, func(text string) {
+			creditCard.Name = text
+		}).
+		AddInputField("code", "", 20, nil, func(text string) {
+			creditCard.Code = text
+		}).
+		AddButton("Save credit card secret", func() {
+			err := a.client.SendSecretCreditCard(secretName, creditCard)
+			if err != nil {
+				widgetStatus.Log("error saving secret: " + err.Error())
+			} else {
+				widgetMainMenu.UpdateList()
+				a.pages.SwitchToPage(PageWidgetMainMenu)
+				widgetStatus.Log("secret saved")
+			}
+			a.app.ForceDraw()
+		})
+
+	a.pages.AddPage(
+		PageCreditCardSecretForm,
+		tview.NewFlex().
+			SetDirection(tview.FlexRow).
+			AddItem(creditCardForm, 10, 1, true).
 			AddItem(widgetStatus.primitive, 10, 1, true),
 		true,
 		true,
@@ -137,9 +185,14 @@ func (a *UIApp) Init() {
 		switch event.Rune() {
 		case 'q', 'Q':
 			a.app.Stop()
-		case 's', 'S':
+		case 't', 'T':
 			if a.client.LoginName != "" {
-				a.pages.SwitchToPage(PageSaveSecret)
+				a.pages.SwitchToPage(PageTextSecretForm)
+				a.app.ForceDraw()
+			}
+		case 'c', 'C':
+			if a.client.LoginName != "" {
+				a.pages.SwitchToPage(PageCreditCardSecretForm)
 				a.app.ForceDraw()
 			}
 		case 'r', 'R':
@@ -155,8 +208,10 @@ func (a *UIApp) Init() {
 			}
 		case 'e', 'E':
 			if a.client.LoginName != "" {
+				a.client.Logout()
 				widgetMainMenu.UpdateMenu(BuildGuestMenu())
 				widgetStatus.Log("Log out")
+				widgetMainMenu.SetList(nil)
 				a.app.ForceDraw()
 			}
 		case 'p', 'P':

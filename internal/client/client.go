@@ -57,6 +57,11 @@ func (c *Client) Login(ctx context.Context, login, password string) error {
 	return c.g.ReInitWithAuth(tokenString)
 }
 
+func (c *Client) Logout() {
+	c.LoginName = ""
+	c.g.ReInitWithAuth("")
+}
+
 func (c *Client) Ping(ctx context.Context) error {
 	return c.g.Ping(ctx)
 }

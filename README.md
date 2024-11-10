@@ -11,5 +11,5 @@ TLS_PUBLIC_KEY_PATH=./data/server_cert.pem TLS_PRIVATE_KEY_PATH=./data/server_ke
 ```
 3. Запустить клиента:
 ```bash
-TLS_PUBLIC_KEY_PATH=./data/server_cert.pem go run ./cmd/client/ ui
+TLS_PRIVATE_KEY_PATH=./data/server_key.pem TLS_PUBLIC_KEY_PATH=./data/server_cert.pem go run ./cmd/client/ ui
 ```

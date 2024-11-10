@@ -10,7 +10,7 @@ import (
 )
 
 func (s *PostgresSuite) TestUserRepository_Create() {
-	r := postgres.NewUserRepository(s.conn)
+	r := postgres.NewUserRepository(s.db)
 	s.Run("Create and get a user", func() {
 		m := entity.User{
 			Login:    "test" + time.Now().Format("2006-01-02T15-04-05.999999999"),

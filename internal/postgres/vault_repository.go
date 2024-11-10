@@ -31,7 +31,7 @@ func (r VaultRepository) GetAll(ctx context.Context, userID uuid.UUID) (map[stri
 
 func (r VaultRepository) Save(ctx context.Context, userID uuid.UUID, key string, bytes []byte) error {
 	id := uuid.Must(uuid.NewV6())
-	q := `INSERT INTO secret (id, user_id, name, value) VALUES ($1, $2, $3, $4)`
+	q := `INSERT INTO secret (id, user_id, name, value) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, name) DO UPDATE SET value = $4`
 	_, err := r.db.ExecContext(ctx, q, id, userID, key, bytes)
 	return err
 }
