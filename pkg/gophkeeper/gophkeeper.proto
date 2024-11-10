@@ -10,78 +10,22 @@ message Credentials {
   string password = 2;
 }
 
-enum Kind {
-  KIND_UNSPECIFIED = 0;
-  KIND_CREDENTIALS = 1;
-  KIND_TEXT = 2;
-  KIND_BINARY = 3;
-  KIND_CREDIT_CARD = 4;
-}
-
-message Metadata {
-  repeated Tag tags = 2;
-}
-
-message Tag {
-  string name = 1;
-  string value = 2;
-}
-
-message CreateCreadentialsReq {
-  Metadata meta = 1;
-  EntityCredentials data = 2;
-}
-
-message CreateCreditCardReq {
-  Metadata meta = 1;
-  EntityCreditCard data = 2;
-}
-
-message CreateBinaryReq {
-  Metadata meta = 1;
-  uint64 length = 2;
-}
-
-message CreateTextReq {
-  Metadata meta = 1;
-  uint64 length = 2;
-}
-
 message EntityCredentials {
   string login = 1;
   string password = 2;
 }
 
-message EntityCreditCard {
-  string number = 2;
-  string name = 3;
-  uint32 month = 4;
-  uint32 year = 5;
-  string code = 6;
+message SecretDataKey {
+  string key = 1;
 }
 
-message CreatedSecret {
-  string id = 1;
+message SecretData {
+  string key = 1;
+  bytes value = 2;
 }
 
-message TextData {
-  Metadata metadata = 1;
-  string length = 2;
-}
-
-message Chunk {
-  uint64 offset = 1;
-  bytes data = 2;
-}
-
-message Entity {
-  string id = 1;
-  string name = 2;
-  Kind kind = 3;
-}
-
-message EntityList {
-  repeated Entity entity = 1;
+message SecretDataList {
+  repeated SecretData entity = 1;
 }
 
 message AuthToken {
@@ -94,17 +38,8 @@ service AuthService {
   rpc Register(Credentials) returns(AuthToken);
 }
 
-message SendDataResponse {
-
-}
-
 service KeeperService {
-  rpc GetAll(Empty) returns(EntityList);
-  rpc CreateCredentials(CreateCreadentialsReq) returns(Entity);
-  rpc CreateCreditCard(CreateCreditCardReq) returns(Entity);
-  rpc CreateText(CreateTextReq) returns(Entity);
-  rpc CreateBinary(CreateBinaryReq) returns(Entity);
-  rpc SendData(stream Chunk) returns(SendDataResponse);
-  rpc ReceiveData(Entity) returns(stream Chunk);
+  rpc GetAll(Empty) returns(SecretDataList);
+  rpc SendSecretData(SecretData) returns(Empty);
   rpc Ping(Empty) returns(Empty);
 }

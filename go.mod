@@ -8,6 +8,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.6.0
+	github.com/jmoiron/sqlx v1.4.0
 	github.com/pressly/goose/v3 v3.21.1
 	github.com/rivo/tview v0.0.0-20240818110301-fd649dbf1223
 	github.com/rs/zerolog v1.33.0

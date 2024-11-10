@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/google/uuid"
 	"github.com/sashaaro/gophkeeper/internal/entity"
@@ -12,12 +13,12 @@ import (
 )
 
 type UserRepository struct {
-	db *Conn
+	db *sqlx.DB
 }
 
-func NewUserRepository(conn *Conn) *UserRepository {
+func NewUserRepository(db *sqlx.DB) *UserRepository {
 	return &UserRepository{
-		db: conn,
+		db: db,
 	}
 }
 

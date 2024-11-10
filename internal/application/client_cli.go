@@ -3,8 +3,6 @@ package application
 import (
 	"context"
 	"fmt"
-	"github.com/sashaaro/gophkeeper/internal/service"
-
 	"github.com/sashaaro/gophkeeper/internal/client"
 	"github.com/sashaaro/gophkeeper/internal/config"
 	"github.com/sashaaro/gophkeeper/internal/log"
@@ -17,12 +15,6 @@ type Pinger interface {
 }
 
 func NewClientCLI(version string, cfg *config.Client) *cli.App {
-
-	jwtSvc, err := service.NewJwtService(cfg.JWT)
-	if err != nil {
-		panic(err)
-	}
-
 	return &cli.App{
 		Name:    "GophKeeper client",
 		Version: version,
@@ -30,7 +22,7 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 			{
 				Name: "ui",
 				Action: func(c *cli.Context) error {
-					cl := client.NewClient(cfg, jwtSvc)
+					cl := client.NewClient(cfg)
 					defer cl.Close()
 					uiApp := ui.NewUIApp(cl)
 					uiApp.Init()
@@ -40,7 +32,7 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 			{
 				Name: "ping",
 				Action: func(ctx *cli.Context) error {
-					cl := client.NewClient(cfg, jwtSvc)
+					cl := client.NewClient(cfg)
 					defer cl.Close()
 					if err := cl.Ping(ctx.Context); err != nil {
 						log.Fatal("Pong fails", log.Err(err))
@@ -55,7 +47,7 @@ func NewClientCLI(version string, cfg *config.Client) *cli.App {
 				Action: func(ctx *cli.Context) error {
 					login := ctx.Args().Get(0)
 					password := ctx.Args().Get(1)
-					cl := client.NewClient(cfg, jwtSvc)
+					cl := client.NewClient(cfg)
 					defer cl.Close()
 					if err := cl.Register(ctx.Context, login, password); err != nil {
 						return err

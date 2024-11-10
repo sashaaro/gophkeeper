@@ -3,21 +3,19 @@ package client
 import (
 	"context"
 	"github.com/sashaaro/gophkeeper/internal/config"
+	"github.com/sashaaro/gophkeeper/internal/entity"
 	"github.com/sashaaro/gophkeeper/internal/log"
-	"github.com/sashaaro/gophkeeper/internal/service"
 )
 
 // Client - Клиент к серверу.
 // TODO Про grpc теоретически не должен знать. Должно описываться интерфейсами.
 type Client struct {
-	g          *GRPCClient
-	JwtToken   *service.JwtClaims
-	jwtService *service.JwtService
+	g         *GRPCClient
+	LoginName string
 }
 
 func NewClient(
 	cfg *config.Client,
-	jwtService *service.JwtService,
 ) *Client {
 	opts := WithoutTLS()
 	if cfg.TLS != nil {
@@ -29,8 +27,7 @@ func NewClient(
 	}
 
 	return &Client{
-		g:          NewGRPCClient(cfg.ServerAddr, opts),
-		jwtService: jwtService,
+		g: NewGRPCClient(cfg.ServerAddr, opts),
 	}
 }
 
@@ -46,10 +43,7 @@ func (c *Client) Register(ctx context.Context, login, password string) error {
 		return err
 	}
 	log.Info("Attach JWT token")
-	c.JwtToken, err = c.jwtService.ParseTokenClaims(tokenString)
-	if err != nil {
-		return err
-	}
+	c.LoginName = login
 	return c.g.ReInitWithAuth(tokenString)
 }
 
@@ -59,14 +53,22 @@ func (c *Client) Login(ctx context.Context, login, password string) error {
 		return err
 	}
 	log.Info("Attach JWT token")
-
-	c.JwtToken, err = c.jwtService.ParseTokenClaims(tokenString)
-	if err != nil {
-		return err
-	}
+	c.LoginName = login
 	return c.g.ReInitWithAuth(tokenString)
 }
 
 func (c *Client) Ping(ctx context.Context) error {
 	return c.g.Ping(ctx)
+}
+
+func (c *Client) SendSecretBinary(name string, value []byte) error {
+	return c.g.SendSecretData(context.Background(), name, BytesToSecretData(value))
+}
+
+func (c *Client) SendSecretText(name string, value string) error {
+	return c.g.SendSecretData(context.Background(), name, StringToText(value))
+}
+
+func (c *Client) SendSecretCreditCard(name string, value entity.CreditCard) error {
+	return c.g.SendSecretData(context.Background(), name, CreditCardToSecretData(value))
 }

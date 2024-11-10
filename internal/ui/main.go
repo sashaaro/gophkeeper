@@ -10,6 +10,7 @@ import (
 const (
 	PageLoginForm        = "login_form"
 	PageRegisterForm     = "register_form"
+	PageSaveSecret       = "save_secret"
 	PageWidgetMainMenu   = "main_menu"
 	PageWidgetSecretList = "secret_list"
 )
@@ -53,7 +54,7 @@ func (a *UIApp) Init() {
 		if err := a.client.Register(context.Background(), f.Login, f.Password); err != nil {
 			widgetStatus.Log("Fail to register: " + err.Error())
 		} else {
-			widgetMainMenu.UpdateMenu(a.client.JwtToken.Subject)
+			widgetMainMenu.UpdateMenu(BuildUserMenu(a.client.LoginName))
 			widgetStatus.Log("User registered")
 		}
 		a.pages.SwitchToPage(PageWidgetMainMenu)
@@ -76,13 +77,14 @@ func (a *UIApp) Init() {
 		if err := a.client.Login(context.Background(), f.Login, f.Password); err != nil {
 			widgetStatus.Log("Fail to login: " + err.Error())
 		} else {
-			widgetMainMenu.UpdateMenu(a.client.JwtToken.Subject)
+			widgetMainMenu.UpdateMenu(BuildUserMenu(a.client.LoginName))
 			widgetStatus.Log("User logged in")
 		}
 		a.pages.SwitchToPage(PageWidgetMainMenu)
+		a.app.ForceDraw()
 	}, func() {
-		widgetStatus.Log("Cancel login")
 		a.pages.SwitchToPage(PageWidgetMainMenu)
+		a.app.ForceDraw()
 	})
 	a.pages.AddPage(
 		PageLoginForm,
@@ -94,26 +96,72 @@ func (a *UIApp) Init() {
 		true,
 	)
 
+	secret := struct {
+		Name  string
+		Value string
+	}{}
+	saveSecretForm := tview.NewForm()
+	saveSecretForm.
+		AddInputField("secret name", "", 20, nil, func(text string) {
+			secret.Name = text
+		}).
+		AddInputField("secret value", "", 20, nil, func(text string) {
+			secret.Value = text
+		}).
+		AddButton("Save secret data", func() {
+			err := a.client.SendSecretText(secret.Name, secret.Value)
+			if err != nil {
+				widgetStatus.Log("error saving secret: " + err.Error())
+			} else {
+				a.pages.SwitchToPage(PageWidgetMainMenu)
+				widgetStatus.Log("secret saved")
+			}
+			a.app.ForceDraw()
+		})
+
+	a.pages.AddPage(
+		PageSaveSecret,
+		tview.NewFlex().
+			SetDirection(tview.FlexRow).
+			AddItem(saveSecretForm, 10, 1, true).
+			AddItem(widgetStatus.primitive, 10, 1, true),
+		true,
+		true,
+	)
+
 	widgetMainMenu.primitive.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Rune() {
-		case 'q':
+		case 'q', 'Q':
 			a.app.Stop()
-		case 'r':
-			widgetRegister.Reset()
-			a.pages.SwitchToPage(PageRegisterForm)
-		case 'l':
-			widgetLogin.Reset()
-			a.pages.SwitchToPage(PageLoginForm)
-		case 'e':
-			widgetMainMenu.UpdateMenu("")
-			widgetStatus.Log("Log out")
-			a.app.ForceDraw()
-		case 'p':
+		case 's', 'S':
+			if a.client.LoginName != "" {
+				a.pages.SwitchToPage(PageSaveSecret)
+				a.app.ForceDraw()
+			}
+		case 'r', 'R':
+			if a.client.LoginName == "" {
+				widgetRegister.Reset()
+				a.pages.SwitchToPage(PageRegisterForm)
+				a.app.ForceDraw()
+			}
+		case 'l', 'L':
+			if a.client.LoginName == "" {
+				widgetLogin.Reset()
+				a.pages.SwitchToPage(PageLoginForm)
+			}
+		case 'e', 'E':
+			if a.client.LoginName != "" {
+				widgetMainMenu.UpdateMenu(BuildGuestMenu())
+				widgetStatus.Log("Log out")
+				a.app.ForceDraw()
+			}
+		case 'p', 'P':
 			if err := a.client.Ping(context.Background()); err != nil {
 				widgetStatus.Log("ping fails: " + err.Error())
 			} else {
 				widgetStatus.Log("pong")
 			}
+			a.app.ForceDraw()
 		}
 		return event
 	})

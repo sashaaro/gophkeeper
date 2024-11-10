@@ -16,18 +16,28 @@ func NewWidgetMainMenu() *WidgetMainMenu {
 		primitive: v,
 	}
 
-	o.UpdateMenu("")
+	o.UpdateMenu(BuildGuestMenu())
 
 	return o
 }
 
-func (w *WidgetMainMenu) UpdateMenu(user string) {
-	menu := []string{"(r) Register", "(p) Ping"}
-	if user == "" {
-		menu = append(menu, "(l) Login")
-	} else {
-		menu = append(menu, "(e) Exit. Logged as "+user)
+func BuildGuestMenu() []string {
+	return []string{
+		"(r) Register",
+		"(l) Login",
 	}
+}
+
+func BuildUserMenu(user string) []string {
+	return []string{
+		"(s) Save data",
+		"(e) Exit. Logged as " + user,
+	}
+}
+
+func (w *WidgetMainMenu) UpdateMenu(menu []string) {
+	baseMenu := []string{"(p) Ping"}
+	baseMenu = append(baseMenu, menu...)
 	menu = append(menu, "(q) Quit")
 
 	w.primitive.SetText(strings.Join(menu, "\n"))

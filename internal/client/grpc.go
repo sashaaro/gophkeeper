@@ -98,6 +98,18 @@ func (c *GRPCClient) Login(ctx context.Context, login, password string) (tokenSt
 	return resp.Jwt, err
 }
 
+func (c *GRPCClient) SendSecretData(ctx context.Context, key string, value SecretData) error {
+	k, err := c.keeperClient()
+	if err != nil {
+		return err
+	}
+	_, err = k.SendSecretData(ctx, &gophkeeper.SecretData{
+		Key:   key,
+		Value: value,
+	})
+	return err
+}
+
 func (c *GRPCClient) keeperClient() (gophkeeper.KeeperServiceClient, error) {
 	if c._keeperClient == nil {
 		conn, err := c.connect()

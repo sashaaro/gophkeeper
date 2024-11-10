@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"embed"
+	"github.com/jmoiron/sqlx"
 	"github.com/pressly/goose/v3"
 
 	"github.com/sashaaro/gophkeeper/internal/log"
@@ -12,7 +12,7 @@ import (
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
 
-func RunMigrations(ctx context.Context, db *sql.DB) error {
+func RunMigrations(ctx context.Context, db *sqlx.DB) error {
 	goose.SetBaseFS(embedMigrations)
 
 	log.Info("DB Migration: start")
@@ -20,7 +20,7 @@ func RunMigrations(ctx context.Context, db *sql.DB) error {
 		return err
 	}
 
-	if err := goose.UpContext(ctx, db, "migrations"); err != nil {
+	if err := goose.UpContext(ctx, db.DB, "migrations"); err != nil {
 		return err
 	}
 	log.Info("DB Migration: success")
