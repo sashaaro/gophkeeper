@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/google/uuid"
+	"github.com/sashaaro/gophkeeper/internal/auth"
 	"github.com/sashaaro/gophkeeper/internal/log"
 	"github.com/sashaaro/gophkeeper/internal/service"
 	"github.com/sashaaro/gophkeeper/pkg/gophkeeper"
@@ -27,7 +27,7 @@ func (s *KeeperServer) Ping(_ context.Context, in *gophkeeper.Empty) (*gophkeepe
 }
 
 func (s *KeeperServer) GetAll(ctx context.Context, v *gophkeeper.Empty) (*gophkeeper.SecretDataList, error) {
-	list, err := s.vaultSvc.GetAll(ctx, uuid.UUID{})
+	list, err := s.vaultSvc.GetAll(ctx, *auth.ExtractUserIDFromContext(ctx))
 
 	res := &gophkeeper.SecretDataList{
 		Entity: make([]*gophkeeper.SecretData, 0, len(list)),
@@ -42,6 +42,6 @@ func (s *KeeperServer) GetAll(ctx context.Context, v *gophkeeper.Empty) (*gophke
 	return res, err
 }
 func (s *KeeperServer) SendSecretData(ctx context.Context, v *gophkeeper.SecretData) (*gophkeeper.Empty, error) {
-	err := s.vaultSvc.Save(ctx, uuid.UUID{}, v.Key, v.Value)
+	err := s.vaultSvc.Save(ctx, *auth.ExtractUserIDFromContext(ctx), v.Key, v.Value)
 	return &gophkeeper.Empty{}, err
 }

@@ -72,3 +72,16 @@ func (c *Client) SendSecretText(name string, value string) error {
 func (c *Client) SendSecretCreditCard(name string, value entity.CreditCard) error {
 	return c.g.SendSecretData(context.Background(), name, CreditCardToSecretData(value))
 }
+
+func (c *Client) GetAll() (map[string][]byte, error) {
+	list, err := c.g.GetAll(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string][]byte, len(list.Entity))
+	for _, data := range list.Entity {
+		res[data.Key] = data.Value
+	}
+
+	return res, nil
+}

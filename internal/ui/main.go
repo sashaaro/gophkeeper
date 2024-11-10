@@ -37,13 +37,14 @@ func NewUIApp(client *client.Client) *UIApp {
 func (a *UIApp) Init() {
 	widgetStatus := NewWidgetStatus()
 
-	widgetMainMenu := NewWidgetMainMenu()
+	widgetMainMenu := NewWidgetMainMenu(a.client, widgetStatus)
 
 	a.pages.AddPage(
 		PageWidgetMainMenu,
 		tview.NewFlex().
 			SetDirection(tview.FlexRow).
 			AddItem(widgetMainMenu.primitive, 10, 1, true).
+			AddItem(widgetMainMenu.list, 10, 1, true).
 			AddItem(widgetStatus.primitive, 10, 1, true),
 		true,
 		true,
@@ -79,7 +80,9 @@ func (a *UIApp) Init() {
 		} else {
 			widgetMainMenu.UpdateMenu(BuildUserMenu(a.client.LoginName))
 			widgetStatus.Log("User logged in")
+			widgetMainMenu.UpdateList()
 		}
+
 		a.pages.SwitchToPage(PageWidgetMainMenu)
 		a.app.ForceDraw()
 	}, func() {
@@ -113,6 +116,7 @@ func (a *UIApp) Init() {
 			if err != nil {
 				widgetStatus.Log("error saving secret: " + err.Error())
 			} else {
+				widgetMainMenu.UpdateList()
 				a.pages.SwitchToPage(PageWidgetMainMenu)
 				widgetStatus.Log("secret saved")
 			}

@@ -110,6 +110,14 @@ func (c *GRPCClient) SendSecretData(ctx context.Context, key string, value Secre
 	return err
 }
 
+func (c *GRPCClient) GetAll(ctx context.Context) (*gophkeeper.SecretDataList, error) {
+	k, err := c.keeperClient()
+	if err != nil {
+		return nil, err
+	}
+	return k.GetAll(ctx, &gophkeeper.Empty{})
+}
+
 func (c *GRPCClient) keeperClient() (gophkeeper.KeeperServiceClient, error) {
 	if c._keeperClient == nil {
 		conn, err := c.connect()
