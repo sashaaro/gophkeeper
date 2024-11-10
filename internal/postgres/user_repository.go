@@ -52,11 +52,13 @@ func (r *UserRepository) GetByLogin(ctx context.Context, login string, m *entity
 		return ErrModelIsNil
 	}
 	row := r.db.QueryRowContext(ctx, `SELECT id, login, pass FROM "user" WHERE login = $1`, login)
-	if err := row.Err(); err != nil {
-		if errors.Is(row.Err(), sql.ErrNoRows) {
+	err := row.Scan(&m.ID, &m.Login, &m.Password)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil
 		}
 		return err
 	}
-	return row.Scan(&m.ID, &m.Login, &m.Password)
+	return nil
 }

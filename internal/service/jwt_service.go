@@ -102,20 +102,32 @@ func (s *JwtService) CreateToken(u entity.User, opts ...TokenOption) (string, er
 	return tokenString, nil
 }
 
-func (s *JwtService) ParseToken(tokenString string) (uuid.UUID, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &JwtClaims{}, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+func (s *JwtService) ParseTokenClaims(tokenString string) (*JwtClaims, error) {
+	var keyFunc jwt.Keyfunc
+	if s.cfg.PublicKey != nil {
+		keyFunc = func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+			return s.cfg.PublicKey, nil
 		}
-		return s.cfg.PublicKey, nil
-	}, jwt.WithLeeway(s.cfg.Leeway))
+	}
+
+	token, err := jwt.ParseWithClaims(tokenString, &JwtClaims{}, keyFunc, jwt.WithLeeway(s.cfg.Leeway))
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 	claims, ok := token.Claims.(*JwtClaims)
 	if !ok || !token.Valid || claims.ID == "" {
 		log.Info("wrong jwt", log.Str("ID", claims.ID))
-		return uuid.Nil, errors.New("wrong structure jwt")
+		return nil, errors.New("wrong structure jwt")
+	}
+	return claims, nil
+}
+func (s *JwtService) ParseToken(tokenString string) (uuid.UUID, error) {
+	claims, err := s.ParseTokenClaims(tokenString)
+	if err != nil {
+		return uuid.Nil, err
 	}
 	return uuid.Parse(claims.ID)
 }

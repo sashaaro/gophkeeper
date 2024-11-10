@@ -24,7 +24,7 @@ func (c *ServerConfig) Certificate() (*tls.Certificate, error) {
 		if c.PublicKeyPath == "" || c.PrivateKeyPath == "" {
 			return nil, nil
 		}
-		cert, err := tls.LoadX509KeyPair(realPath(c.PublicKeyPath), realPath(c.PrivateKeyPath))
+		cert, err := tls.LoadX509KeyPair(c.PublicKeyPath, c.PrivateKeyPath)
 		if err != nil {
 			return nil, fmt.Errorf("load key pair fails: %w", err)
 		}
@@ -38,7 +38,7 @@ func (c *ClientConfig) Certificate() (credentials.TransportCredentials, error) {
 		if c.PublicKeyPath == "" {
 			return nil, nil
 		}
-		cred, err := credentials.NewClientTLSFromFile(realPath(c.PublicKeyPath), "x.test.example.com")
+		cred, err := credentials.NewClientTLSFromFile(c.PublicKeyPath, "x.test.example.com")
 		if err != nil {
 			return nil, fmt.Errorf("load client tls fails: %w", err)
 		}

@@ -2,7 +2,6 @@ package ui
 
 import (
 	"context"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/sashaaro/gophkeeper/internal/client"
@@ -37,11 +36,24 @@ func NewUIApp(client *client.Client) *UIApp {
 func (a *UIApp) Init() {
 	widgetStatus := NewWidgetStatus()
 
+	widgetMainMenu := NewWidgetMainMenu()
+
+	a.pages.AddPage(
+		PageWidgetMainMenu,
+		tview.NewFlex().
+			SetDirection(tview.FlexRow).
+			AddItem(widgetMainMenu.primitive, 10, 1, true).
+			AddItem(widgetStatus.primitive, 10, 1, true),
+		true,
+		true,
+	)
+
 	widgetRegister := NewWidgetRegister(func(f RegisterForm) {
 		// On register
 		if err := a.client.Register(context.Background(), f.Login, f.Password); err != nil {
 			widgetStatus.Log("Fail to register: " + err.Error())
 		} else {
+			widgetMainMenu.UpdateMenu(a.client.JwtToken.Subject)
 			widgetStatus.Log("User registered")
 		}
 		a.pages.SwitchToPage(PageWidgetMainMenu)
@@ -64,6 +76,7 @@ func (a *UIApp) Init() {
 		if err := a.client.Login(context.Background(), f.Login, f.Password); err != nil {
 			widgetStatus.Log("Fail to login: " + err.Error())
 		} else {
+			widgetMainMenu.UpdateMenu(a.client.JwtToken.Subject)
 			widgetStatus.Log("User logged in")
 		}
 		a.pages.SwitchToPage(PageWidgetMainMenu)
@@ -81,16 +94,6 @@ func (a *UIApp) Init() {
 		true,
 	)
 
-	widgetMainMenu := NewWidgetMainMenu()
-	a.pages.AddPage(
-		PageWidgetMainMenu,
-		tview.NewFlex().
-			SetDirection(tview.FlexRow).
-			AddItem(widgetMainMenu.primitive, 10, 1, true).
-			AddItem(widgetStatus.primitive, 10, 1, true),
-		true,
-		true,
-	)
 	widgetMainMenu.primitive.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Rune() {
 		case 'q':
@@ -101,6 +104,10 @@ func (a *UIApp) Init() {
 		case 'l':
 			widgetLogin.Reset()
 			a.pages.SwitchToPage(PageLoginForm)
+		case 'e':
+			widgetMainMenu.UpdateMenu("")
+			widgetStatus.Log("Log out")
+			a.app.ForceDraw()
 		case 'p':
 			if err := a.client.Ping(context.Background()); err != nil {
 				widgetStatus.Log("ping fails: " + err.Error())
@@ -110,8 +117,17 @@ func (a *UIApp) Init() {
 		}
 		return event
 	})
+
+	a.pages.SwitchToPage(PageWidgetMainMenu)
 }
 
 func (a *UIApp) Run() error {
 	return a.app.Run()
+}
+
+func Must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
 }

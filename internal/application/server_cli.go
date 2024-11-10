@@ -44,7 +44,7 @@ func NewServerCLI(version string, cfg *config.Server) *cli.App {
 					vaultSvc := service.NewVaultService(vaultRepo)
 					cert, err := cfg.TLS.Certificate()
 					if err != nil {
-						log.Panic("failed to load key pair: %s", log.Err(err))
+						log.Panic("failed to load key pair", log.Err(err))
 					}
 
 					opts := []server.Opt{
