@@ -1,0 +1,45 @@
+syntax = "proto3";
+package gophkeeper.v1;
+
+option go_package = "keeper/gophkeeper";
+
+message Empty {}
+
+message Credentials {
+  string login = 1;
+  string password = 2;
+}
+
+message EntityCredentials {
+  string login = 1;
+  string password = 2;
+}
+
+message SecretDataKey {
+  string key = 1;
+}
+
+message SecretData {
+  string key = 1;
+  bytes value = 2;
+}
+
+message SecretDataList {
+  repeated SecretData entity = 1;
+}
+
+message AuthToken {
+  string jwt = 1;
+  string userID = 2;
+}
+
+service AuthService {
+  rpc Login(Credentials) returns(AuthToken);
+  rpc Register(Credentials) returns(AuthToken);
+}
+
+service KeeperService {
+  rpc GetAll(Empty) returns(SecretDataList);
+  rpc SendSecretData(SecretData) returns(Empty);
+  rpc Ping(Empty) returns(Empty);
+}
